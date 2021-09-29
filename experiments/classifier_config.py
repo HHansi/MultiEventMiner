@@ -9,7 +9,7 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
 # TEMP_DIRECTORY = "temp"
-# SUBMISSION_FILE = "submission.json"
+SUBMISSION_FILE = os.path.join(OUTPUT_DIRECTORY, 'submission.json')
 
 MODEL_NAME = "bert-base-cased"
 LANGUAGES = ["en"]
@@ -24,6 +24,7 @@ config = {
     'n_epochs': 2,
     'train_batch_size': 8,
     'eval_batch_size': 8,
+    'inference_batch_size': 4,
     'evaluate_every': 4,
     'learning_rate': 3e-5,
     'metric': ["f1_macro", "acc"],

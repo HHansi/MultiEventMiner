@@ -121,12 +121,26 @@ class ClassificationModel:
             model.save(self.args.model_dir)
             processor.save(self.args.model_dir)
 
-    def predict(self, texts):
-        model = Inferencer.load(self.args.model_dir)
-        raw_predictions = model.inference_from_dicts(dicts=texts)
+    def predict(self, texts, inference_batch_size):
+        """
+        predict labels for given samples
+
+        :param texts: list of dict {'text': "sample text"}
+        :param inference_batch_size: int
+        :return: list, list
+            predictions- list of class labels
+            raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
+        """
+        model = Inferencer.load(self.args.model_dir, batch_size=inference_batch_size)
+        result = model.inference_from_dicts(dicts=texts)
         model.close_multiprocessing_pool()
-        predictions = [x['label'] for x in raw_predictions[0]['predictions']]
-        return predictions, raw_predictions[0]['predictions']
+
+        raw_predictions = []
+        for idx, chunk_res in enumerate(result):
+            raw_predictions += chunk_res["predictions"]
+
+        predictions = [x['label'] for x in raw_predictions]
+        return predictions, raw_predictions
 
     def _load_model_args(self, input_dir):
         args = ClassificationModelArgs()
