@@ -38,7 +38,7 @@ class ClassificationModel:
         elif isinstance(args, ClassificationModelArgs):
             self.args = args
 
-        set_all_seeds(seed=self.args.manual_seed)
+        # set_all_seeds(seed=self.args.manual_seed)
         self.device, self.n_gpu = initialize_device_settings(use_cuda=self.args.use_cuda, use_amp=self.args.use_amp)
 
     def train_model(self, data_dir):
@@ -123,9 +123,10 @@ class ClassificationModel:
 
     def predict(self, texts):
         model = Inferencer.load(self.args.model_dir)
-        result = model.inference_from_dicts(dicts=texts)
+        raw_predictions = model.inference_from_dicts(dicts=texts)
         model.close_multiprocessing_pool()
-        return result
+        predictions = [x['label'] for x in raw_predictions]
+        return predictions, raw_predictions
 
     def _load_model_args(self, input_dir):
         args = ClassificationModelArgs()

@@ -10,7 +10,6 @@ class ModelArgs:
     use_cuda: bool = True
     use_amp: str = None
     max_processes: int = 1
-    manual_seed: int = 25
 
     do_lower_case: bool = False
     max_seq_len: int = 128
