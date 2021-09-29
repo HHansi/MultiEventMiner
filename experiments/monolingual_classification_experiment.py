@@ -17,9 +17,9 @@ if __name__ == '__main__':
     ]
     test_preds = np.zeros((len(test_sentences), config["n_fold"]))
 
-    for i in range(1, config["n_fold"]+1):
-        config['model_dir'] = config['model_dir'] + "_" + i
-        set_all_seeds(seed=config['manual_seed']*i)
+    for i in range(config["n_fold"]):
+        config['model_dir'] = f"{config['model_dir']}_{i}"
+        set_all_seeds(seed=config['manual_seed']*(i+1))
 
         model = ClassificationModel(MODEL_NAME, args=config)
         data_dir = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/filtered/temp')
