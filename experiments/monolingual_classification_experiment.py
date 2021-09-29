@@ -8,7 +8,7 @@ from algo.models.classification_model import ClassificationModel
 from algo.util.file_util import delete_create_folder
 from experiments.classifier_config import MODEL_NAME, config, DATA_DIRECTORY, OUTPUT_DIRECTORY, LANGUAGES, \
     SUBMISSION_FILE
-from experiments.data.data_util import read_data_df, preprocess_data
+from experiments.data_process.data_util import read_data_df, preprocess_data
 from farm.utils import set_all_seeds
 
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     delete_create_folder(OUTPUT_DIRECTORY)
-    data_dir = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/filtered/temp')
+    data_dir = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
 
     # read test data
     test_data_path = os.path.join(DATA_DIRECTORY, "subtask2-sentence", f"{LANGUAGES[0]}-test.json")
@@ -48,12 +48,7 @@ if __name__ == '__main__':
 
         logger.info(f"Making test predictions for fold {i}...")
         predictions, raw_predictions = model.predict(test_sentences, config['inference_batch_size'])
-        print(predictions)
-        print(f'raw predictions: {raw_predictions}')
-
         test_preds[:, i] = predictions
-
-    print(test_preds)
 
     # select majority class of each instance (row)
     logger.info(f"Calculating majority class...")
@@ -62,7 +57,6 @@ if __name__ == '__main__':
         row = row.tolist()
         test_predictions.append(int(max(set(row), key=row.count)))
     test_df["predictions"] = test_predictions
-    print(test_predictions)
 
     logger.info(f"Saving test predictions...")
     with open(SUBMISSION_FILE, 'w') as f:

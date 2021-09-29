@@ -389,7 +389,7 @@ class Trainer:
                     report=self.eval_report
                 )
                 result = evaluator_dev.eval(self.model)
-                evaluator_dev.log_results(result, "Dev", self.global_step)
+                # evaluator_dev.log_results(result, "Dev", self.global_step)
                 evaluator_dev.save_result(result, os.path.join(self.early_stopping.save_dir, 'dev_eval_results.txt'))
 
         # Eval on test set

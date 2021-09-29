@@ -21,20 +21,20 @@ config = {
 
     'do_lower_case': False,
     'max_seq_len': 128,
-    'n_epochs': 2,
+    'n_epochs': 3,
     'train_batch_size': 8,
     'eval_batch_size': 8,
     'inference_batch_size': 4,
     'evaluate_every': 4,
-    'learning_rate': 3e-5,
+    'learning_rate': 1e-5,  # 3e-5
     'metric': ["f1_macro", "acc"],
     'use_early_stopping': True,
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"
-    'early_stopping_patience': 5,
+    'early_stopping_patience': 10,
 
     'label_list': ["0", "1"],
-    'train_filename': "en-train2.tsv",
+    'train_filename': "en-train.tsv",
     'dev_split': 0.1,
     'dev_stratification': True,
     'delimiter': "\t",
