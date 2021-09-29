@@ -7,7 +7,6 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
-MODEL_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, "model")
 
 # TEMP_DIRECTORY = "temp"
 # SUBMISSION_FILE = "submission.json"
@@ -17,8 +16,8 @@ LANGUAGES = ["en"]
 
 config = {
     'manual_seed': SEED,
-    'model_dir': MODEL_DIRECTORY,
-    'train_progress_file': os.path.join(MODEL_DIRECTORY, "training_progress_scores.csv"),
+    'model_dir': os.path.join(OUTPUT_DIRECTORY, "model"),
+    'train_progress_file': os.path.join(OUTPUT_DIRECTORY, "training_progress_scores.csv"),
 
     'do_lower_case': False,
     'max_seq_len': 128,

@@ -19,7 +19,12 @@ if __name__ == '__main__':
 
     for i in range(config["n_fold"]):
         config['model_dir'] = f"{config['model_dir']}_{i}"
-        set_all_seeds(seed=config['manual_seed']*(i+1))
+        train_progress_file_name = os.path.basename(config['train_progress_file'])
+        file_name_splits = os.path.splitext(train_progress_file_name)
+        config['train_progress_file'] = os.path.join(os.path.dirname(config['train_progress_file']),
+                                                     f"{file_name_splits[0]}_{i}{file_name_splits[1]}")
+
+        set_all_seeds(seed=config['manual_seed'] * (i + 1))
 
         model = ClassificationModel(MODEL_NAME, args=config)
         data_dir = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/filtered/temp')
@@ -45,6 +50,3 @@ if __name__ == '__main__':
         test_predictions.append(int(max(set(row), key=row.count)))
     # test["predictions"] = test_predictions
     print(test_predictions)
-
-
-
