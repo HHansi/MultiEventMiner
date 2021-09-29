@@ -24,8 +24,8 @@ config = {
     'n_epochs': 3,
     'train_batch_size': 8,
     'eval_batch_size': 8,
-    'inference_batch_size': 4,
-    'evaluate_every': 4,
+    'inference_batch_size': 8,
+    'evaluate_every': 200,  # 4
     'learning_rate': 1e-5,  # 3e-5
     'metric': ["f1_macro", "acc"],
     'use_early_stopping': True,

@@ -23,7 +23,7 @@ if __name__ == '__main__':
     test_df = read_data_df(test_data_path)
     test_df = test_df.rename(columns={'sentence': 'text'})
     test_df['text'] = test_df['text'].apply(lambda x: preprocess_data(x))
-    test_df = test_df.head(100)
+    # test_df = test_df.head(100)
     test_sentences = test_df[['text']].to_dict(orient='records')
 
     # test_sentences = [  # 0, 1
