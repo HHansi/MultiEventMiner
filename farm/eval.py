@@ -189,7 +189,7 @@ class Evaluator:
                         f.write("{}: \n {}".format(metric_name, metric_val))
                     else:
                         if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
-                            f.write("{}: {}".format(metric_name, metric_val))
+                            f.write("\n{}: {}".format(metric_name, metric_val))
 
 
 

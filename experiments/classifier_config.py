@@ -26,7 +26,7 @@ config = {
     'eval_batch_size': 8,
     'evaluate_every': 4,
     'learning_rate': 3e-5,
-    'metric': ["f1_macro"],
+    'metric': ["f1_macro", "acc"],
     'use_early_stopping': True,
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"
