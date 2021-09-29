@@ -1,0 +1,10 @@
+boto3
+seqeval
+mlflow<=1.13.1
+transformers==4.7.0
+sentence-transformers
+dotmap
+Werkzeug==0.16.1
+flask-restplus
+flask-cors
+sentencepiece
