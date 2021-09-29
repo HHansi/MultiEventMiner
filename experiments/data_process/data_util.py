@@ -5,7 +5,7 @@ import re
 
 import pandas as pd
 
-from algo.data_process.data_preprocessor import remove_links
+from algo.util.data_preprocessor import remove_links
 from algo.util.file_util import create_folder_if_not_exist
 
 
