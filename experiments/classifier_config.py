@@ -1,5 +1,6 @@
 # Created by Hansi at 9/21/2021
 import os
+from multiprocessing import cpu_count
 
 SEED = 157
 
@@ -24,7 +25,7 @@ config = {
     'n_epochs': 3,
     'train_batch_size': 8,
     'eval_batch_size': 8,
-    'inference_batch_size': 8,
+    'inference_batch_size': 8,  # 4
     'evaluate_every': 200,  # 4
     'learning_rate': 1e-5,  # 3e-5
     'metric': ["f1_macro", "acc"],
@@ -40,7 +41,7 @@ config = {
     'delimiter': "\t",
     'label_column_name': "label",  # for classification
     'text_column_name': "text",
-    'max_processes': 1,  # 128 is default
+    'max_processes': cpu_count() - 2 if cpu_count() > 2 else 1,  # 128 is default
     'use_amp': None,
 
     'n_fold': 1

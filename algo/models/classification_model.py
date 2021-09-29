@@ -49,7 +49,8 @@ class ClassificationModel:
                                                 delimiter=self.args.delimiter,
                                                 label_column_name=self.args.label_column_name,
                                                 text_column_name=self.args.text_column_name,
-                                                multilabel=self.args.multilabel
+                                                multilabel=self.args.multilabel,
+                                                quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
                                                 )
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
         #    few descriptive statistics of our datasets
