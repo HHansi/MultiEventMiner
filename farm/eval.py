@@ -180,7 +180,7 @@ class Evaluator:
     def save_result(results, file_path):
         with open(file_path, 'w') as f:
             for head_num, head in enumerate(results):
-                f.write("\n _________ {} _________".format(head['task_name']))
+                f.write("_________ {} _________\n".format(head['task_name']))
                 for metric_name, metric_val in head.items():
                     if metric_name == "report":
                         if isinstance(metric_val, str) and len(metric_val) > 8000:
@@ -189,7 +189,7 @@ class Evaluator:
                         f.write("{}: \n {}".format(metric_name, metric_val))
                     else:
                         if not metric_name in ["preds", "labels"] and not metric_name.startswith("_"):
-                            f.write("\n{}: {}".format(metric_name, metric_val))
+                            f.write("{}: {}\n".format(metric_name, metric_val))
 
 
 
