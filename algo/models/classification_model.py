@@ -2,17 +2,6 @@
 import logging
 from pathlib import Path
 
-# from FARM2.farm.data_handler.data_silo import DataSilo
-# from FARM2.farm.data_handler.processor import TextClassificationProcessor
-# from FARM2.farm.infer import Inferencer
-# from FARM2.farm.modeling.adaptive_model import AdaptiveModel
-# from FARM2.farm.modeling.language_model import LanguageModel
-# from FARM2.farm.modeling.optimization import initialize_optimizer
-# from FARM2.farm.modeling.prediction_head import TextClassificationHead
-# from FARM2.farm.modeling.tokenization import Tokenizer
-# from FARM2.farm.train import Trainer, EarlyStopping
-# from FARM2.farm.utils import initialize_device_settings, set_all_seeds
-# from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.processor import TextClassificationProcessor
 from farm.infer import Inferencer
