@@ -125,8 +125,8 @@ class ClassificationModel:
         model = Inferencer.load(self.args.model_dir)
         raw_predictions = model.inference_from_dicts(dicts=texts)
         model.close_multiprocessing_pool()
-        predictions = [x['label'] for x in raw_predictions]
-        return predictions, raw_predictions
+        predictions = [x['label'] for x in raw_predictions[0]['predictions']]
+        return predictions, raw_predictions[0]['predictions']
 
     def _load_model_args(self, input_dir):
         args = ClassificationModelArgs()
