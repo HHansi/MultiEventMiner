@@ -2,23 +2,35 @@
 import logging
 import os
 
+import numpy as np
+
 from algo.models.ner_model import NERModel
 from algo.util.file_util import delete_create_folder
-from experiments.ner_config import OUTPUT_DIRECTORY, DATA_DIRECTORY, config, MODEL_NAME
+from experiments.data_process.data_util import read_tokens
+from experiments.ner_config import OUTPUT_DIRECTORY, DATA_DIRECTORY, config, MODEL_NAME, SUBMISSION_FILE, LANGUAGES
 from farm.utils import set_all_seeds
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 if __name__ == '__main__':
     delete_create_folder(OUTPUT_DIRECTORY)
-    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
+    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003')
+
+    # read test data
+    # test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", f"{LANGUAGES[0]}-test.txt")
+    # test_tokens, _ = read_tokens(test_data_path, train=False)
+    # test_sentences = [{"text": " ".join(sent_tokens)} for sent_tokens in test_tokens]
 
     test_sentences = [
-        {"text": "Paris is a town in France."},
+        {"text": "Paris is a town in France ."},
+        {"text": "Only France and Britain backed proposal ."},
+        {"text": "Peter Blackburn"},
     ]
+    test_tokens = [sent["text"].split() for sent in test_sentences]
 
-    # test_preds = np.zeros((len(test_sentences), config["n_fold"]))
+    test_preds = []  # [[fold_0 predictions], ... [fold_n predictions]]
 
     for i in range(config["n_fold"]):
         # update model dir for the fold
@@ -37,18 +49,24 @@ if __name__ == '__main__':
         logger.info(f"Making test predictions for fold {i}...")
         predictions, raw_predictions = model.predict(test_sentences, config['inference_batch_size'])
         print(raw_predictions)
-        # test_preds[:, i] = predictions
+        test_preds.append(predictions)
 
-    # # select majority class of each instance (row)
-    # logger.info(f"Calculating majority class...")
-    # test_predictions = []
-    # for row in test_preds:
-    #     row = row.tolist()
-    #     test_predictions.append(int(max(set(row), key=row.count)))
-    # test_df["predictions"] = test_predictions
+    # select majority class for each token in each sentence
+    logger.info(f"Calculating majority class...")
+    final_preds = []
+    test_preds = np.array(test_preds)
+    for n in range(len(test_sentences)):  # iterate through each sentence
+        temp_preds = []
+        for i in range(len(test_preds[:, n][0])):  # iterate through each token
+            fold_preds = test_preds[:, n][:, i].tolist()  # get predictions by folds for token
+            temp_preds.append(
+                max(set(fold_preds), key=fold_preds.count))  # get majority class and add to temp_predictions
+        final_preds.append(temp_preds)
 
-    # logger.info(f"Saving test predictions...")
-    # with open(SUBMISSION_FILE, 'w') as f:
-    #     for index, row in test_df.iterrows():
-    #         item = {"id": row['id'], "prediction": row['predictions']}
-    #         f.write("%s\n" % item)
+    logger.info(f"Saving test predictions...")
+    with open(SUBMISSION_FILE, "w", encoding="utf-8") as f:
+        for tokens, labels in zip(test_tokens, final_preds):
+            f.write("SAMPLE_START\tO\n")
+            for token, label in zip(tokens, labels):
+                f.write("{}\t{}\n".format(token, label))
+            f.write("\n")

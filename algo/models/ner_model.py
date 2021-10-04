@@ -1,5 +1,6 @@
 # Created by Hansi at 10/4/2021
 import logging
+import re
 from pathlib import Path
 
 from algo.models.config.model_args import NERModelArgs
@@ -35,7 +36,7 @@ class NERModel:
         tokenizer = Tokenizer.load(pretrained_model_name_or_path=self.model_name,
                                    do_lower_case=self.args.do_lower_case)
 
-        ner_labels = ["[PAD]", "X", "O"] + self.args.label_list
+        ner_labels = ["[PAD]", "X"] + self.args.label_list
 
         # create a DataProcessor that handles all the conversion from raw text into a pytorch Dataset
         processor = NERProcessor(tokenizer=tokenizer,
@@ -47,9 +48,9 @@ class NERModel:
                                  dev_filename=self.args.dev_filename,
                                  test_filename=self.args.test_filename,
                                  dev_split=self.args.dev_split,
-                                 dev_stratification=False,  # To fix data split issue
+                                 # dev_stratification=False,  # To fix data split issue
                                  delimiter=self.args.delimiter,
-                                 quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
+                                 # quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
         )
 
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
@@ -111,6 +112,12 @@ class NERModel:
             model.save(self.args.model_dir)
             processor.save(self.args.model_dir)
 
+        del model
+        del processor
+        del optimizer
+        del data_silo
+        del trainer
+
     def predict(self, texts, inference_batch_size):
         """
         predict labels for given samples
@@ -129,12 +136,44 @@ class NERModel:
         for idx, chunk_res in enumerate(result):
             raw_predictions += chunk_res["predictions"]
 
-        # predictions = [x['label'] for x in raw_predictions]
-        predictions = []
+        predictions = self.to_iob(texts, raw_predictions)
         return predictions, raw_predictions
 
     def _load_model_args(self, input_dir):
         args = NERModelArgs()
         args.load(input_dir)
         return args
+
+    @staticmethod
+    def to_iob(sentences, predictions):
+        """
+        Convert raw NER output to IOB2 format
+        :param sentences: list of dict {'text': "sample text"}
+        :param predictions: list of dict {'start': i, 'end': j, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
+        :return: list
+            list of list which contains IOB tags
+        """
+        iob_outputs = []
+        for idx, sample_labels in enumerate(predictions):
+            indices = [(ele.start(), ele.end()) for ele in re.finditer(r'\S+', sentences[idx]["text"])]
+            iob_output = ["O" for index in indices]
+            for label in sample_labels:
+                if label['label'] in ["[PAD]", "X"]:
+                    continue
+                for i, ind in enumerate(indices):
+                    if ind[0] == label['start']:
+                        iob_output[i] = f"B-{label['label']}"
+                        if ind[1] != label['end']:
+                            end_word_index = 0
+                            for j in range(i + 1, len(indices)):
+                                if indices[j][1] == label['end']:
+                                    end_word_index = j
+                                    break
+                            if end_word_index == 0:
+                                raise ValueError(f"Span index error found in output: {label}")
+                            for i_index in range(i + 1, end_word_index + 1):
+                                iob_output[i_index] = f"I-{label['label']}"
+                        break
+            iob_outputs.append(iob_output)
+        return iob_outputs
 

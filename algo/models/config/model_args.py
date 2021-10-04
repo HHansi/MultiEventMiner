@@ -84,7 +84,7 @@ class NERModelArgs(ModelArgs):
     task_name: str = "ner"
     lm_output_types = ["per_token"]
 
-    label_list: list = None  # only I and B tags
+    label_list: list = None  # I and B and O tags
     train_filename: str = "train.txt"
     dev_filename: str = None
     dev_split: float = 0.1
