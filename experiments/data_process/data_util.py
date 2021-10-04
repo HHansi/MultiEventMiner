@@ -1,12 +1,14 @@
 # Created by Hansi at 4/9/2021
 
 import json
+import os
 import re
 
 import pandas as pd
 
 from algo.util.data_preprocessor import remove_links
 from algo.util.file_util import create_folder_if_not_exist
+from experiments.ner_config import DATA_DIRECTORY
 
 
 def read_data(path):
@@ -73,6 +75,59 @@ def preprocess_data(text):
     # remove extra whitespace, newline, tab
     text = ' '.join(text.split())
     return text
+
+
+def get_token_test_instances(tokens):
+    """
+    Load test sentences (NER)
+    :param tokens: list of tokens
+    :return: list, dict,
+        list of sentence tokens
+        dict {instance_index: [sentence indices in list of sentence tokens]}
+    """
+    sentence_tokens = []
+    dict_instance_sentence = dict()
+    sentence_index = -1
+
+    for idx, temp_tokens in enumerate(tokens):
+        instance_sentence_indices = []
+        SEP_indices = [i for i, value in enumerate(temp_tokens) if value == '[SEP]']
+
+        if len(SEP_indices) == 0:  # If no [SEP] labels found, the instance has one sentence.
+            sentence_tokens.append(temp_tokens)
+            sentence_index += 1
+            instance_sentence_indices.append(sentence_index)
+        else:
+            SEP_indices.insert(0, -1)  # Add the index of -1 to the beginning
+            SEP_indices.insert(len(SEP_indices), len(temp_tokens))
+
+            for i in range(0, len(SEP_indices)):
+                if i < (len(SEP_indices) - 1):
+                    temp_sent_tokens = temp_tokens[SEP_indices[i] + 1:SEP_indices[i + 1]]
+
+                    sentence_tokens.append(temp_sent_tokens)
+                    sentence_index += 1
+                    instance_sentence_indices.append(sentence_index)
+        dict_instance_sentence[idx] = instance_sentence_indices
+
+    return sentence_tokens, dict_instance_sentence
+
+
+if __name__ == '__main__':
+    test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "en-test.txt")
+    tokens, _ = read_tokens(test_data_path, train=False)
+    sentence_tokens, dict_instance_sentence= get_token_test_instances(tokens)
+    print(len(sentence_tokens))
+
+    merged = []
+    for k, v in dict_instance_sentence.items():
+        merged_pred = sentence_tokens[v[0]]
+        if len(v) > 1:
+            for i in v[1:len(v)]:
+                merged_pred.extend(["O"])
+                merged_pred.extend(sentence_tokens[i])
+        merged.append(merged_pred)
+    print(merged)
 
 
 
