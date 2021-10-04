@@ -64,6 +64,7 @@ class ClassificationModel:
         # create an AdaptiveModel
         language_model = LanguageModel.load(self.model_name)
         prediction_head = TextClassificationHead(
+            task_name=self.args.task_name,
             class_weights=data_silo.calculate_class_weights(task_name=self.args.task_name),
             num_labels=len(self.args.label_list))
         model = AdaptiveModel(
