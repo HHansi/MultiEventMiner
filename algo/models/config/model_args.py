@@ -22,7 +22,6 @@ class ModelArgs:
     max_grad_norm: float = 1.0
 
     # eval
-    metric = ["f1_macro", "acc"]  # for classification
     evaluate_every: int = 1
     use_early_stopping: bool = True
     early_stopping_metric: str = "loss"
@@ -37,7 +36,6 @@ class ModelArgs:
                 setattr(self, key, value)
         else:
             raise (TypeError(f"{new_values} is not a Python dict."))
-
 
     def get_args_for_saving(self):
         args_for_saving = {key: value for key, value in asdict(self).items() if key not in self.not_saved_args}
@@ -77,4 +75,21 @@ class ClassificationModelArgs(ModelArgs):
     delimiter = "\t"
     label_column_name = "label"  # for classification
     text_column_name = "text"  # for classification
+    # eval
+    metric = ["f1_macro", "acc"]  # for classification
 
+
+@dataclass
+class NERModelArgs(ModelArgs):
+    task_name: str = "ner"
+    lm_output_types = ["per_token"]
+
+    label_list: list = None  # only I and B tags
+    train_filename: str = "train.txt"
+    dev_filename: str = None
+    dev_split: float = 0.1
+    test_filename: str = None
+    # data format
+    delimiter = "\t"
+    # eval
+    metric = "seq_f1"
