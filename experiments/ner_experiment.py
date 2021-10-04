@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     delete_create_folder(OUTPUT_DIRECTORY)
-    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003')
+    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
 
     # read test data
     # test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", f"{LANGUAGES[0]}-test.txt")
@@ -55,10 +55,25 @@ if __name__ == '__main__':
     logger.info(f"Calculating majority class...")
     final_preds = []
     test_preds = np.array(test_preds)
+    print(test_preds)
+
+    # for n in range(len(test_sentences)):  # iterate through each sentence
+    #     print(f'sentence: {n}')
+    #     temp_preds = []
+    #     for i in range(len(test_preds[:, n][0])):  # iterate through each token
+    #         print(f'i: {i} - {test_preds[:, n]}')
+    #         fold_preds = test_preds[:, n][:, i].tolist()  # get predictions by folds for token
+    #         temp_preds.append(
+    #             max(set(fold_preds), key=fold_preds.count))  # get majority class and add to temp_predictions
+    #     final_preds.append(temp_preds)
+
     for n in range(len(test_sentences)):  # iterate through each sentence
+        print(f'sentence: {test_sentences[n]}')
         temp_preds = []
+        print(f'{test_preds[:, n]}')
         for i in range(len(test_preds[:, n][0])):  # iterate through each token
-            fold_preds = test_preds[:, n][:, i].tolist()  # get predictions by folds for token
+            fold_preds = [test_preds[:, n][k][i] for k in range(config["n_fold"])]  # get predictions by folds for token
+            print(f'{i} - {fold_preds}')
             temp_preds.append(
                 max(set(fold_preds), key=fold_preds.count))  # get majority class and add to temp_predictions
         final_preds.append(temp_preds)
