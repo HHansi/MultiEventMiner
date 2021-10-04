@@ -47,6 +47,7 @@ class NERModel:
                                  dev_filename=self.args.dev_filename,
                                  test_filename=self.args.test_filename,
                                  dev_split=self.args.dev_split,
+                                 dev_stratification=False,  # To fix data split issue
                                  delimiter=self.args.delimiter,
                                  quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
         )
