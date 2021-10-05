@@ -42,8 +42,8 @@ def majority_class_for_ner(sentences, preds, n_folds):
 
 if __name__ == '__main__':
     delete_create_folder(OUTPUT_DIRECTORY)
-    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
-    # data_dir = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
+    # data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
+    data_dir = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
 
     # read test data
     test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", f"{LANGUAGES[0]}-test.txt")
