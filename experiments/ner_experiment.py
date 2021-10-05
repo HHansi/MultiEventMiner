@@ -42,8 +42,8 @@ def majority_class_for_ner(sentences, preds, n_folds):
 
 if __name__ == '__main__':
     delete_create_folder(OUTPUT_DIRECTORY)
-    # data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
-    data_dir = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
+    data_dir = os.path.join(DATA_DIRECTORY, 'conll2003/temp')
+    # data_dir = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
 
     # read test data
     test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", f"{LANGUAGES[0]}-test.txt")
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # merge split sentences
     merged_preds = []
     for k, v in dict_instance_sentence.items():
-        merged_pred = final_preds[v[0]]
+        merged_pred = final_preds[v[0]]  # There is at least 1 sentence in an instance
         if len(v) > 1:
             for i in v[1:len(v)]:
                 merged_pred.extend(["O"])
