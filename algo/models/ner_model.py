@@ -66,7 +66,7 @@ class NERModel:
         language_model = LanguageModel.load(self.model_name)
         prediction_head = TokenClassificationHead(
             task_name=self.args.task_name,
-            num_labels=len(self.args.label_list))
+            num_labels=len(ner_labels))
         model = AdaptiveModel(
             language_model=language_model,
             prediction_heads=[prediction_head],
