@@ -41,7 +41,7 @@ config = {
     'delimiter': "\t",
     'label_column_name': "label",  # for classification
     'text_column_name': "text",
-    'max_processes': cpu_count() - 2 if cpu_count() > 2 else 1,  # 128 is default
+    'max_processes': 1,  # cpu_count() - 2 if cpu_count() > 2 else 1,  # 128 is default
     'use_amp': None,
 
     'n_fold': 1

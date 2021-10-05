@@ -112,6 +112,12 @@ class ClassificationModel:
             model.save(self.args.model_dir)
             processor.save(self.args.model_dir)
 
+        del model
+        del processor
+        del optimizer
+        del data_silo
+        del trainer
+
     def predict(self, texts, inference_batch_size):
         """
         predict labels for given samples
