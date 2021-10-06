@@ -44,5 +44,6 @@ config = {
     'max_processes': 128,  # cpu_count() - 2 if cpu_count() > 2 else 1,  # 128 is default
     'use_amp': None,
 
-    'n_fold': 1
+    'n_fold': 1,
+    'fold_ids': [0]  # list of ids for folds
 }
