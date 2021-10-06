@@ -12,7 +12,7 @@ OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 # TEMP_DIRECTORY = "temp"
 SUBMISSION_FILE = os.path.join(OUTPUT_DIRECTORY, 'submission.txt')
 
-MODEL_NAME = "bert-base-cased"
+MODEL_NAME = "bert-large-cased"
 LANGUAGES = ["en"]
 
 config = {

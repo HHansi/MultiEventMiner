@@ -28,12 +28,12 @@ def majority_class_for_ner(sentences, preds, n_folds):
     final_preds = []
     # print(test_preds)
     for n in range(len(sentences)):  # iterate through each sentence
-        print(f'sentence: {sentences[n]}')
+        # print(f'sentence: {sentences[n]}')
         temp_preds = []
-        print(f'{preds[:, n]}')
+        # print(f'{preds[:, n]}')
         for i in range(len(preds[:, n][0])):  # iterate through each token
             fold_preds = [preds[:, n][k][i] for k in range(n_folds)]  # get predictions by folds for token
-            print(f'{i} - {fold_preds}')
+            # print(f'{i} - {fold_preds}')
             temp_preds.append(
                 max(set(fold_preds), key=fold_preds.count))  # get majority class and add to temp_predictions
         final_preds.append(temp_preds)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
         logger.info(f"Making test predictions for fold {i}...")
         predictions, raw_predictions = model.predict(test_sentences, config['inference_batch_size'])
-        print(raw_predictions)
+        # print(raw_predictions)
         test_preds.append(predictions)
 
     # select majority class for each token in each sentence
