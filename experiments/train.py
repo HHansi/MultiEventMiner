@@ -26,6 +26,7 @@ def train_classifier(data_dir, config):
             f"{file_name_splits[0]}_{i}{file_name_splits[1]}")
 
         set_all_seeds(seed=config['manual_seed'] * (i + 1))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
 
         model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
         logger.info(f"Training model for fold {i}...")
