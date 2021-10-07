@@ -68,7 +68,8 @@ class ClassificationModelArgs(ModelArgs):
     train_filename: str = "train.tsv"  # for classification
     dev_filename: str = None
     dev_split: float = 0.1
-    dev_stratification = False
+    dev_stratification = False  # if true, create a class-stratified split for the dev set. Stratified split preserves
+    # the same proportions of examples in each class as observed in the original dataset
     test_filename: str = None
     multilabel: bool = False  # set to True for multilabel classification
     # data format

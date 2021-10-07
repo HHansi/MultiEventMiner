@@ -1108,6 +1108,8 @@ class NERProcessor(Processor):
 
         self.pre_tokenizer = WhitespaceSplit()
 
+        self.dev_stratification = False  # added to fix data split issue
+
         super(NERProcessor, self).__init__(
             tokenizer=tokenizer,
             max_seq_len=max_seq_len,
