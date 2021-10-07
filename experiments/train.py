@@ -43,7 +43,8 @@ def train_ner(data_dir, config):
         config['train_progress_file'] = os.path.join(os.path.dirname(config['train_progress_file']),
                                                      f"{file_name_splits[0]}_{i}{file_name_splits[1]}")
 
-        set_all_seeds(seed=config['manual_seed'] * (i + 1))
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
 
         model = NERModel(ner_config.MODEL_NAME, args=config)
         logger.info(f"Training model for fold {i}...")
@@ -58,3 +59,4 @@ if __name__ == '__main__':
     # train ner
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
     # train_classifier(data_dir, ner_config.config)
+
