@@ -10,7 +10,8 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
 # TEMP_DIRECTORY = "temp"
-SUBMISSION_FILE = os.path.join(OUTPUT_DIRECTORY, 'submission.json')
+PREDICTION_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, 'predictions')
+SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
 
 MODEL_NAME = "bert-large-cased"
 LANGUAGES = ["en"]
@@ -25,7 +26,7 @@ config = {
     'n_epochs': 3,
     'train_batch_size': 8,
     'eval_batch_size': 8,
-    'inference_batch_size': 8,  # 4
+    'inference_batch_size': 16,  # 4
     'evaluate_every': 200,  # 4
     'learning_rate': 1e-5,  # 3e-5
     'metric': ["f1_macro", "acc"],

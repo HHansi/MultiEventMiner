@@ -6,6 +6,7 @@ import numpy as np
 
 from algo.models.classification_model import ClassificationModel
 from algo.models.ner_model import NERModel
+from algo.util.file_util import create_folder_if_not_exist
 from experiments import classifier_config
 from experiments import ner_config
 from experiments.data_process.data_util import read_data_df, preprocess_data, read_tokens, get_token_test_instances
@@ -34,6 +35,7 @@ class TestInstanceNER:
 
 
 def predict_classifier(args):
+    create_folder_if_not_exist(classifier_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in classifier_config.LANGUAGES:
         # read test data
@@ -82,6 +84,7 @@ def predict_classifier(args):
 
 
 def predict_ner(args):
+    create_folder_if_not_exist(ner_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in ner_config.LANGUAGES:
         # read test data
