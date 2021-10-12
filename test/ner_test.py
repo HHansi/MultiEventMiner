@@ -1,9 +1,9 @@
 # Created by Hansi at 10/4/2021
-
 import unittest
 
 from algo.models.ner_model import NERModel
 from experiments.ner_experiment import majority_class_for_ner
+from experiments.predict import remove_ib, labels_to_iob
 
 
 class TestNERFormatting(unittest.TestCase):
@@ -22,6 +22,36 @@ class TestNERFormatting(unittest.TestCase):
                            ['B-PER', 'I-PER']]
 
         output = NERModel.to_iob(test_sentences, test_predictions)
+        print(output)
+        self.assertEqual(output, expected_output)
+
+    def test_remove_IB(self):
+        iob_outputs = [['O', 'O', 'O', 'O', 'O', 'O'],
+                       ['O', 'B-LOC', 'O', 'B-LOC', 'O', 'O', 'O'],
+                       ['B-PER', 'I-PER'],
+                       ['B-PER-B', 'I-PER-B', 'B-LOC-I']]
+
+        expected_output = [['O', 'O', 'O', 'O', 'O', 'O'],
+                           ['O', 'LOC', 'O', 'LOC', 'O', 'O', 'O'],
+                           ['PER', 'PER'],
+                           ['PER-B', 'PER-B', 'LOC-I']]
+
+        output = remove_ib(iob_outputs)
+        print(output)
+        self.assertEqual(output, expected_output)
+
+    def test_labels_to_IOB(self):
+        labels = [['O', 'O', 'O', 'O', 'O', 'O'],
+                  ['O', 'LOC', 'O', 'LOC', 'O', 'O', 'O'],
+                  ['PER', 'PER'],
+                  ['PER-B', 'PER-B', 'LOC-I']]
+
+        expected_output = [['O', 'O', 'O', 'O', 'O', 'O'],
+                           ['O', 'B-LOC', 'O', 'B-LOC', 'O', 'O', 'O'],
+                           ['B-PER', 'I-PER'],
+                           ['B-PER-B', 'I-PER-B', 'B-LOC-I']]
+
+        output = labels_to_iob(labels)
         print(output)
         self.assertEqual(output, expected_output)
 

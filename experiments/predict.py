@@ -1,6 +1,7 @@
 # Created by Hansi at 10/11/2021
 import logging
 import os
+import re
 
 import numpy as np
 
@@ -34,6 +35,47 @@ class TestInstanceNER:
         self.dict_instance_sentence = dict_instance_sentence
         self.sentences = sentences
         self.preds = preds
+
+
+def remove_ib(iob_outputs):
+    """
+    Remove I- and B- tags in IOB labels
+    :param iob_outputs: list
+        list of list which contains IOB tags
+    :return: list
+        list of list only with labels except I- and B-
+    """
+    updated_outputs = []
+    for sent in iob_outputs:
+        updated = [re.sub("^[BI]-", "", token) for token in sent]
+        updated_outputs.append(updated)
+    return updated_outputs
+
+
+def labels_to_iob(labels):
+    """
+    Covert labels to IOB2 format
+    :param labels: list
+        list of list of labels (O and other labels without I- and B-)
+    :return: list
+        list of list which contains IOB tags
+    """
+    iob_labels = []
+    for instance in labels:
+        previous_label = ""
+        iob = []
+        for label in instance:
+            if label == "O":
+                updated_label = label
+            else:
+                if label == previous_label:
+                    updated_label = f"I-{label}"
+                else:
+                    updated_label = f"B-{label}"
+            iob.append(updated_label)
+            previous_label = label
+        iob_labels.append(iob)
+    return iob_labels
 
 
 def predict_classifier(args):
@@ -112,7 +154,7 @@ def predict_ner(args):
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
             predictions, raw_predictions = model.predict(test_instances[lang].sentences)
-            test_instances[lang].preds.append(predictions)
+            test_instances[lang].preds.append(remove_ib(predictions))
 
         del model
 
@@ -120,6 +162,7 @@ def predict_ner(args):
         # select majority class for each token in each sentence
         logger.info(f"Calculating majority class for {lang}...")
         final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, args["n_fold"])
+        final_preds = labels_to_iob(final_preds)
 
         # merge split sentences
         merged_preds = []
