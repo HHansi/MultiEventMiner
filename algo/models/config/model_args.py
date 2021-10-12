@@ -15,13 +15,13 @@ class ModelArgs:
     max_seq_len: int = 128
     n_epochs: int = 1
     train_batch_size: int = 8
-    eval_batch_size: int = 8
     embeds_dropout_prob: float = 0.1  # The probability that a value in the embeddings returned by the language model will be zeroed.
     learning_rate: float = 3e-5
     gradient_accumulation_steps: int = 1
     max_grad_norm: float = 1.0
 
     # eval
+    eval_batch_size: int = 8
     evaluate_every: int = 1
     use_early_stopping: bool = True
     early_stopping_metric: str = "loss"
@@ -29,6 +29,11 @@ class ModelArgs:
     early_stopping_patience: int = 5
     model_dir: str = "outputs/model"
     train_progress_file: str = "outputs/training_progress_scores.csv"
+
+    # inferencing
+    inference_batch_size: int = 8
+    gpu: bool = False
+    num_processes: int = 1
 
     def update_from_dict(self, new_values):
         if isinstance(new_values, dict):

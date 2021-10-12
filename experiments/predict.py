@@ -12,6 +12,8 @@ from experiments import ner_config
 from experiments.data_process.data_util import read_data_df, preprocess_data, read_tokens, get_token_test_instances
 from experiments.ner_experiment import majority_class_for_ner
 from farm.utils import set_all_seeds
+# import warnings
+# warnings.filterwarnings("ignore")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -59,7 +61,7 @@ def predict_classifier(args):
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
-            predictions, raw_predictions = model.predict(test_instances[lang].sentences, args['inference_batch_size'])
+            predictions, raw_predictions = model.predict(test_instances[lang].sentences)
             test_instances[lang].preds[:, i] = predictions
 
         del model

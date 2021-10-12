@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 
+from algo.models.config.model_args import ClassificationModelArgs
 from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.processor import TextClassificationProcessor
 from farm.infer import Inferencer
@@ -11,8 +12,7 @@ from farm.modeling.optimization import initialize_optimizer
 from farm.modeling.prediction_head import TextClassificationHead
 from farm.modeling.tokenization import Tokenizer
 from farm.train import EarlyStopping, Trainer
-from farm.utils import set_all_seeds, initialize_device_settings
-from algo.models.config.model_args import ClassificationModelArgs
+from farm.utils import initialize_device_settings
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,8 @@ class ClassificationModel:
                                                 label_column_name=self.args.label_column_name,
                                                 text_column_name=self.args.text_column_name,
                                                 multilabel=self.args.multilabel,
-                                                quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
+                                                quote_char='"'
+                                                # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
                                                 )
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
         #    few descriptive statistics of our datasets
@@ -118,7 +119,7 @@ class ClassificationModel:
         del data_silo
         del trainer
 
-    def predict(self, texts, inference_batch_size):
+    def predict(self, texts):
         """
         predict labels for given samples
 
@@ -128,7 +129,9 @@ class ClassificationModel:
             predictions- list of class labels
             raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
         """
-        model = Inferencer.load(self.args.model_dir, batch_size=inference_batch_size)
+        model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
+                                max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                num_processes=self.args.num_processes)
         result = model.inference_from_dicts(dicts=texts)
         model.close_multiprocessing_pool()
 

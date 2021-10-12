@@ -42,11 +42,15 @@ config = {
     'delimiter': "\t",
     'label_column_name': "label",  # for classification
     'text_column_name': "text",
-    'max_processes': 128,  # cpu_count() - 2 if cpu_count() > 2 else 1,  # 128 is default
+    'max_processes': 128,  # 128 is default
     'use_amp': None,
 
     'n_fold': 1,
-    'fold_ids': [0]  # list of ids for folds
+    'fold_ids': [0],  # list of ids for folds
+
+    # for inferencer
+    'gpu': True,
+    'num_processes': cpu_count() - 2 if cpu_count() > 2 else 1
 }
 
 
