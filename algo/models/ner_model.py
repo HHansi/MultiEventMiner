@@ -117,7 +117,7 @@ class NERModel:
         del data_silo
         del trainer
 
-    def predict(self, texts, inference_batch_size):
+    def predict(self, texts):
         """
         predict labels for given samples
 
@@ -127,7 +127,9 @@ class NERModel:
             predictions- list of class labels
             raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
         """
-        model = Inferencer.load(self.args.model_dir, batch_size=inference_batch_size)
+        model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
+                                max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                num_processes=self.args.num_processes)
         result = model.inference_from_dicts(dicts=texts)
         model.close_multiprocessing_pool()
 

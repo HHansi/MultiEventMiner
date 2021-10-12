@@ -46,6 +46,7 @@ def predict_classifier(args):
         test_df = test_df.rename(columns={'sentence': 'text'})
         test_df['text'] = test_df['text'].apply(lambda x: preprocess_data(x))
         test_sentences = test_df[['text']].to_dict(orient='records')
+        logger.info(f"{len(test_sentences)} test sentences are loaded.")
 
         test_preds = np.zeros((len(test_sentences), args["n_fold"]))
         test_instances[lang] = TestInstanceClassifier(lang, test_df, test_sentences, test_preds)
@@ -110,7 +111,7 @@ def predict_ner(args):
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
-            predictions, raw_predictions = model.predict(test_instances[lang].sentences, args['inference_batch_size'])
+            predictions, raw_predictions = model.predict(test_instances[lang].sentences)
             test_instances[lang].preds.append(predictions)
 
         del model
