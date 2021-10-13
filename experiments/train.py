@@ -30,7 +30,13 @@ def train_classifier(data_dir, config):
         set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
         logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
 
-        model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
+        if classifier_config.MODEL_NAME is not None:
+            model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
+        else:
+            if classifier_config.MODEL_DIRECTORY is None:
+                raise ValueError(f"Model directory is not defined!")
+            else:
+                model = ClassificationModel(os.path.join(classifier_config.MODEL_DIRECTORY, f"model_{i}"), args=config)
         logger.info(f"Training model for fold {i}...")
         model.train_model(data_dir)
 
