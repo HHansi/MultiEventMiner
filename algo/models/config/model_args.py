@@ -99,3 +99,14 @@ class NERModelArgs(ModelArgs):
     delimiter = "\t"
     # eval
     metric = "seq_f1"
+
+
+@dataclass
+class LMArgs(ModelArgs):
+    lm_output_types = ["per_token", "per_sequence"]
+
+    train_filename: str = "train.tsv"
+    dev_filename: str = None
+    dev_split: float = 0.1
+    test_filename: str = None
+
