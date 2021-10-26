@@ -8,7 +8,7 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
-MODEL_NAME = "bert-base-cased"
+MODEL_NAME = "bert-large-cased"
 
 config = {
     'manual_seed': SEED,
@@ -21,7 +21,7 @@ config = {
     'train_batch_size': 8,
     'eval_batch_size': 8,
     'inference_batch_size': 16,
-    'evaluate_every': 1000,
+    'evaluate_every': 500,
     'learning_rate': 1e-5,
     'use_early_stopping': True,
     'early_stopping_metric': "loss",
