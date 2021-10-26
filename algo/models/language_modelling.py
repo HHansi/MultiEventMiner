@@ -98,7 +98,8 @@ class LanguageModellingModel:
             grad_acc_steps=self.args.gradient_accumulation_steps,
             early_stopping=early_stopping,
             max_grad_norm=self.args.max_grad_norm,
-            train_progress_file=self.args.train_progress_file
+            train_progress_file=self.args.train_progress_file,
+            eval_report=False
         )
 
         trainer.train()
