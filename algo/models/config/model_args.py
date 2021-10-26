@@ -110,3 +110,5 @@ class LMArgs(ModelArgs):
     dev_split: float = 0.1
     test_filename: str = None
 
+    next_sent_pred: bool = True
+

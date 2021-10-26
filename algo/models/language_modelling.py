@@ -42,7 +42,8 @@ class LanguageModellingModel:
             train_filename=self.args.train_filename,
             dev_filename=self.args.dev_filename,
             test_filename=self.args.test_filename,
-            dev_split=self.args.dev_split
+            dev_split=self.args.dev_split,
+            next_sent_pred=self.args.next_sent_pred
         )
 
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a few descriptive statistics of our datasets

@@ -34,5 +34,6 @@ config = {
     'use_amp': None,
 
     'fold_ids': [0],  # list of ids for folds
+    'next_sent_pred': False
 }
 
