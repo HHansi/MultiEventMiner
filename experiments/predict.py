@@ -206,7 +206,7 @@ def predict_ner_binary(args):
         dev_data_path = os.path.join(ner_config.DATA_DIRECTORY, "subtask4-token/filtered/farm_format/split_binary", f"{lang}-dev.txt")
         data = read_ner_file(dev_data_path)
         tokens = [x['text'].split() for x in data]
-        labels = [x['ner_label'] for x in data]
+        labels = [list(map(int, x['ner_label'])) for x in data]
         test_sentences = [{"text": " ".join(sent_tokens)} for sent_tokens in tokens]
 
         test_preds = []  # [[fold_0 predictions], ... [fold_n predictions]]
@@ -224,6 +224,10 @@ def predict_ner_binary(args):
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
             predictions, raw_predictions = model.predict(test_instances[lang].sentences)
+            for idx, p in enumerate(predictions):
+                if len(test_instances[lang].test_tokens[idx]) > len(p):
+                    predictions[idx] = p + [0 for i in range(len(test_instances[lang].test_tokens[idx]) - len(p))]
+
             test_instances[lang].preds.append(predictions)
 
         del model
@@ -249,3 +253,4 @@ if __name__ == '__main__':
     # predict_ner(ner_config.config)
 
     predict_ner_binary(ner_config.config)
+
