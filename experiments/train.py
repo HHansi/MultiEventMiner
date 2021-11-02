@@ -7,6 +7,9 @@ from algo.models.ner_model import NERModel
 from algo.util.file_util import delete_create_folder
 from experiments import classifier_config
 from experiments import ner_config
+from farm.conversion.transformers import Converter
+from farm.data_handler.processor import TextClassificationProcessor
+from farm.modeling.tokenization import Tokenizer
 from farm.utils import set_all_seeds
 
 logging.basicConfig(level=logging.INFO)
@@ -69,11 +72,34 @@ def train_ner(data_dir, config):
         model.train_model(data_dir)
 
 
+# def convert():
+#     path = os.path.join(classifier_config.MODEL_DIRECTORY, f"model_0")
+#     model = Converter.convert_from_transformers(path, device="cpu")
+#     # model.save(os.path.join(classifier_config.MODEL_DIRECTORY, f"model_1"))
+#
+#     tokenizer = Tokenizer.load(pretrained_model_name_or_path=path, do_lower_case=True)
+#     processor = TextClassificationProcessor(tokenizer=tokenizer,
+#                                             max_seq_len=128,
+#                                             data_dir="data",
+#                                             label_list=[],
+#                                             label_column_name="label",
+#                                             metric="acc",
+#                                             quote_char='"',
+#                                             )
+#
+#     model.connect_heads_with_processor(processor.tasks, require_labels=True)
+#
+#     save_dir = os.path.join(classifier_config.MODEL_DIRECTORY, f"model_2")
+#     model.save(save_dir)
+#     processor.save(save_dir)
+
+
 if __name__ == '__main__':
     # train classifier
-    data_dir = os.path.join(classifier_config.DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
-    train_classifier(data_dir, classifier_config.config)
+    # data_dir = os.path.join(classifier_config.DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
+    # train_classifier(data_dir, classifier_config.config)
 
     # train ner
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
-    # train_ner(data_dir, ner_config.config)
+    data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format/split_binary')
+    train_ner(data_dir, ner_config.config)

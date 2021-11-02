@@ -15,7 +15,7 @@ SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.txt')
 
 # Either one (model name or directory) should be provided. Other should be set to None.
 # If both provided, only the model name will be considered.
-MODEL_NAME = "bert-large-cased"
+MODEL_NAME = "bert-base-cased"
 MODEL_DIRECTORY = ""  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
 LANGUAGES = ["en"]
 
@@ -37,11 +37,13 @@ config = {
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"
     'early_stopping_patience': 10,
+    'label_format': "binary",   # "iob", "binary"
 
-    'label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
-                  "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
+    'label_list': ["0", "1"],
+    # 'label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
+    #               "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
     # 'label_list': ["O", "B-MISC", "I-MISC", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "B-OTH", "I-OTH"],
-    'train_filename': "en-train.txt",  # "train.txt"
+    'train_filename': "en-train.txt",  # "en-train.txt"
     'dev_filename': None,  # "valid.txt"
     'dev_split': 0.1,
     'delimiter': "\t",  # " "
