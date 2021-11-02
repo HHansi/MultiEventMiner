@@ -9,6 +9,7 @@ import pandas as pd
 from algo.util.data_preprocessor import remove_links
 from algo.util.file_util import create_folder_if_not_exist
 from experiments.ner_config import DATA_DIRECTORY
+from farm.data_handler.utils import read_ner_file
 
 
 def read_data(path):
@@ -66,6 +67,15 @@ def save_tokens(tokens, labels, path):
             f.write("\n")
 
 
+def save_tokens_farm_format(tokens, labels, path):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("-DOCSTART-\tO\n\n")
+        for temp_tokens, temp_labels in zip(tokens, labels):
+            for token, label in zip(temp_tokens, temp_labels):
+                f.write("{}\t{}\n".format(token, label))
+            f.write("\n")
+
+
 def preprocess_data(text):
     text = text.replace("\n", " ")
     text = re.sub("__+", "", text)  # remove if text has more than 1 _
@@ -114,20 +124,24 @@ def get_token_test_instances(tokens):
 
 
 if __name__ == '__main__':
-    test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "en-test.txt")
-    tokens, _ = read_tokens(test_data_path, train=False)
-    sentence_tokens, dict_instance_sentence= get_token_test_instances(tokens)
-    print(len(sentence_tokens))
+    # test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "en-test.txt")
+    # tokens, _ = read_tokens(test_data_path, train=False)
+    # sentence_tokens, dict_instance_sentence= get_token_test_instances(tokens)
+    # print(len(sentence_tokens))
+    #
+    # merged = []
+    # for k, v in dict_instance_sentence.items():
+    #     merged_pred = sentence_tokens[v[0]]
+    #     if len(v) > 1:
+    #         for i in v[1:len(v)]:
+    #             merged_pred.extend(["O"])
+    #             merged_pred.extend(sentence_tokens[i])
+    #     merged.append(merged_pred)
+    # print(merged)
 
-    merged = []
-    for k, v in dict_instance_sentence.items():
-        merged_pred = sentence_tokens[v[0]]
-        if len(v) > 1:
-            for i in v[1:len(v)]:
-                merged_pred.extend(["O"])
-                merged_pred.extend(sentence_tokens[i])
-        merged.append(merged_pred)
-    print(merged)
+    path = os.path.join(DATA_DIRECTORY, "subtask4-token", "filtered/farm_format/en-en-en-train.txt")
+    data = read_ner_file(path)
+    print()
 
 
 
