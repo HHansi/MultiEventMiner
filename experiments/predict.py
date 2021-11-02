@@ -224,7 +224,7 @@ def predict_ner_binary(args):
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
             predictions, raw_predictions = model.predict(test_instances[lang].sentences)
-            test_instances[lang].preds.append(remove_ib(predictions))
+            test_instances[lang].preds.append(predictions)
 
         del model
 
