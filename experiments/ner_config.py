@@ -32,7 +32,7 @@ config = {
     'inference_batch_size': 16,  # 2
     'evaluate_every': 30,  # 1
     'learning_rate': 1e-5,
-    'metric': "seq_f1",
+    'metric': "token_f1",  # "seq_f1"
     'use_early_stopping': True,
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"

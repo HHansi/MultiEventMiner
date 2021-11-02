@@ -3,9 +3,12 @@ import logging
 import re
 from pathlib import Path
 
+from sklearn.metrics import f1_score
+
 from algo.models.config.model_args import NERModelArgs
 from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.processor import NERProcessor
+from farm.evaluation.metrics import register_metrics
 from farm.infer import Inferencer
 from farm.modeling.adaptive_model import AdaptiveModel
 from farm.modeling.language_model import LanguageModel
@@ -16,6 +19,13 @@ from farm.train import EarlyStopping, Trainer
 from farm.utils import initialize_device_settings
 
 logger = logging.getLogger(__name__)
+
+
+def token_macro_f1(y_true, y_pred):
+    f1_scores = []
+    for t, p in zip(y_true, y_pred):
+        f1_scores.append(f1_score(t, p, average="macro"))
+    return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
 
 
 class NERModel:
@@ -30,6 +40,9 @@ class NERModel:
 
         # set_all_seeds(seed=self.args.manual_seed)
         self.device, self.n_gpu = initialize_device_settings(use_cuda=self.args.use_cuda, use_amp=self.args.use_amp)
+
+        if (isinstance(self.args.metric, list) and "token_f1" in self.args.metric) or self.args.metric == "token_f1":
+            register_metrics("token_f1", token_macro_f1)
 
     def train_model(self, data_dir):
         # create tokenizer
