@@ -89,6 +89,7 @@ class ClassificationModelArgs(ModelArgs):
 class NERModelArgs(ModelArgs):
     task_name: str = "ner"
     lm_output_types = ["per_token"]
+    label_format = "iob"  # "iob", "binary"
 
     label_list: list = None  # I and B and O tags
     train_filename: str = "train.txt"

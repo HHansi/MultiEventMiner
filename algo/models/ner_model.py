@@ -137,7 +137,12 @@ class NERModel:
         for idx, chunk_res in enumerate(result):
             raw_predictions += chunk_res["predictions"]
 
-        predictions = self.to_iob(texts, raw_predictions)
+        if self.args.label_format == "iob":
+            predictions = self.to_iob(texts, raw_predictions)
+        elif self.args.label_format == "binary":
+            predictions = self.to_binary(texts, raw_predictions)
+        else:
+            raise KeyError(f"Label output format is not defined!")
         return predictions, raw_predictions
 
     def _load_model_args(self, input_dir):
@@ -177,4 +182,18 @@ class NERModel:
                         break
             iob_outputs.append(iob_output)
         return iob_outputs
+
+    @staticmethod
+    def to_binary(sentence, predictions):
+        binary_outputs = []
+        for idx, sample_labels in enumerate(predictions):
+            binary_output = []
+            for label in sample_labels:
+                label_val = label['label']
+                binary_output.append(0 if label_val in ["[PAD]", "X"] else int(label_val))
+            binary_outputs.append(binary_output)
+        return binary_output
+
+
+
 
