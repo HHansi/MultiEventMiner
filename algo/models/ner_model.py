@@ -205,7 +205,7 @@ class NERModel:
                 label_val = label['label']
                 binary_output.append(0 if label_val in ["[PAD]", "X"] else int(label_val))
             binary_outputs.append(binary_output)
-        return binary_output
+        return binary_outputs
 
 
 

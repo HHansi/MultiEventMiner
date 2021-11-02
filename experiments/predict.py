@@ -6,12 +6,14 @@ import re
 import numpy as np
 
 from algo.models.classification_model import ClassificationModel
-from algo.models.ner_model import NERModel
+from algo.models.ner_model import NERModel, token_macro_f1
 from algo.util.file_util import create_folder_if_not_exist
 from experiments import classifier_config
 from experiments import ner_config
-from experiments.data_process.data_util import read_data_df, preprocess_data, read_tokens, get_token_test_instances
+from experiments.data_process.data_util import read_data_df, preprocess_data, read_tokens, get_token_test_instances, \
+    save_tokens_farm_format
 from experiments.ner_experiment import majority_class_for_ner
+from farm.data_handler.utils import read_ner_file
 from farm.utils import set_all_seeds
 # import warnings
 # warnings.filterwarnings("ignore")
@@ -35,6 +37,15 @@ class TestInstanceNER:
         self.dict_instance_sentence = dict_instance_sentence
         self.sentences = sentences
         self.preds = preds
+
+
+class TestInstanceNERBinary:
+    def __init__(self, lang, test_tokens, test_sentences, preds, test_labels):
+        self.lang = lang
+        self.test_tokens = test_tokens
+        self.sentences = test_sentences
+        self.preds = preds
+        self.test_labels = test_labels
 
 
 def remove_ib(iob_outputs):
@@ -187,7 +198,54 @@ def predict_ner(args):
                 f.write("\n")
 
 
+def predict_ner_binary(args):
+    create_folder_if_not_exist(ner_config.PREDICTION_DIRECTORY)
+    test_instances = dict()
+    for lang in ner_config.LANGUAGES:
+        # read dev data
+        dev_data_path = os.path.join(ner_config.DATA_DIRECTORY, "subtask4-token/filtered/farm_format/split_binary", f"{lang}-dev.txt")
+        data = read_ner_file(dev_data_path)
+        tokens = [x['text'].split() for x in data]
+        labels = [x['ner_label'] for x in data]
+        test_sentences = [{"text": " ".join(sent_tokens)} for sent_tokens in tokens]
+
+        test_preds = []  # [[fold_0 predictions], ... [fold_n predictions]]
+        test_instances[lang] = TestInstanceNERBinary(lang, tokens, test_sentences, test_preds, labels)
+
+    base_model_dir = args['model_dir']
+    for i in range(args["n_fold"]):
+        args['model_dir'] = f"{base_model_dir}_{i}"
+
+        set_all_seeds(seed=int(args['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(args['manual_seed'] * (i + 1))}")
+
+        model = NERModel(ner_config.MODEL_NAME, args=args)
+
+        logger.info(f"Making test predictions for fold {i}...")
+        for lang in test_instances.keys():
+            predictions, raw_predictions = model.predict(test_instances[lang].sentences)
+            test_instances[lang].preds.append(remove_ib(predictions))
+
+        del model
+
+    for lang in test_instances.keys():
+        # select majority class for each token in each sentence
+        logger.info(f"Calculating majority class for {lang}...")
+        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, args["n_fold"])
+
+        logger.info(f"Saving test predictions for {lang}...")
+        submission_file_name = os.path.basename(ner_config.SUBMISSION_FILE)
+        submission_file_name_splits = os.path.splitext(submission_file_name)
+        submission_file = os.path.join(os.path.dirname(ner_config.SUBMISSION_FILE),
+                                       f"{submission_file_name_splits[0]}_{lang}{submission_file_name_splits[1]}")
+        save_tokens_farm_format(test_instances[lang].test_tokens, final_preds, submission_file)
+
+        logger.info(f"Evaluation of {lang}: \n {token_macro_f1(test_instances[lang].test_labels, final_preds)}")
+
+
 if __name__ == '__main__':
-    predict_classifier(classifier_config.config)
+    # predict_classifier(classifier_config.config)
 
     # predict_ner(ner_config.config)
+
+    predict_ner_binary(ner_config.config)
