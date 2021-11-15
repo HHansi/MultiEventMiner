@@ -44,7 +44,7 @@ config = {
     # 'token_label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
     #               "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
 
-    'train_filename': "en-train.csv",
+    'train_filename': "en-train-binary.csv",
     'dev_filename': None,
     'dev_split': 0.1,
     'delimiter': ",",
