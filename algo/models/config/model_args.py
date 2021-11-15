@@ -103,6 +103,27 @@ class NERModelArgs(ModelArgs):
 
 
 @dataclass
+class MTLModelArgs(ModelArgs):
+    lm_output_types = ["per_sequence", "per_token"]
+
+    text_column_name: str = "text"
+    text_label_column_name: str = "label"
+    token_label_column_name: str = "token_label"
+
+    text_metric = ["f1_macro", "acc"]
+    token_metric = "seq_f1"
+    train_filename: str = "train.csv"
+    dev_filename: str = None
+    dev_split: float = 0.1
+    test_filename: str = None
+    delimiter = ","
+    dev_stratification = False
+
+    text_label_list: list = None
+    token_label_list: list = None
+
+
+@dataclass
 class LMArgs(ModelArgs):
     lm_output_types = ["per_token", "per_sequence"]
 
