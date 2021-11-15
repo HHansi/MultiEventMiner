@@ -109,6 +109,7 @@ class MTLModelArgs(ModelArgs):
     text_column_name: str = "text"
     text_label_column_name: str = "label"
     token_label_column_name: str = "token_label"
+    label_format = "iob"  # "iob", "binary"
 
     text_metric = ["f1_macro", "acc"]
     token_metric = "seq_f1"

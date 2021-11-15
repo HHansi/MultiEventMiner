@@ -6,10 +6,13 @@ from typing import List
 import torch
 from sklearn.metrics import f1_score
 
+from algo.models.common.eval import token_macro_f1
+from algo.models.common.ner_util import to_iob, to_binary
 from algo.models.config.model_args import MTLModelArgs
 from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.mtl_processor import MTLProcessor
 from farm.evaluation.metrics import register_metrics
+from farm.infer import Inferencer
 from farm.modeling.adaptive_model import AdaptiveModel
 from farm.modeling.language_model import LanguageModel
 from farm.modeling.optimization import initialize_optimizer
@@ -21,11 +24,11 @@ from farm.utils import initialize_device_settings
 logger = logging.getLogger(__name__)
 
 
-def token_macro_f1(y_true, y_pred):
-    f1_scores = []
-    for t, p in zip(y_true, y_pred):
-        f1_scores.append(f1_score(t, p, average="macro"))
-    return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
+# def token_macro_f1(y_true, y_pred):
+#     f1_scores = []
+#     for t, p in zip(y_true, y_pred):
+#         f1_scores.append(f1_score(t, p, average="macro"))
+#     return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
 
 
 def loss_function(individual_losses: List[torch.Tensor], global_step=None, batch=None, alpha=1, beta=1):
@@ -143,6 +146,30 @@ class MTLModel:
         del optimizer
         del data_silo
         del trainer
+
+    def predict(self, texts):
+        model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
+                                max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                num_processes=self.args.num_processes)
+        result = model.inference_from_dicts(dicts=texts)
+        model.close_multiprocessing_pool()
+
+        raw_label_predictions_list, raw_tokens_predictions_list = [], []
+        for idx, chunk_res in enumerate(result):
+            if idx % 2 == 0:
+                raw_label_predictions_list += chunk_res["predictions"]
+            else:
+                raw_tokens_predictions_list += chunk_res["predictions"]
+
+        label_predictions = [x['label'] for x in raw_label_predictions_list]
+
+        if self.args.label_format == "iob":
+            token_predictions = to_iob(texts, raw_tokens_predictions_list)
+        elif self.args.label_format == "binary":
+            token_predictions = to_binary(texts, raw_tokens_predictions_list)
+        else:
+            raise KeyError(f"Label output format is not defined!")
+        return label_predictions, token_predictions
 
     def _load_model_args(self, input_dir):
         args = MTLModelArgs()

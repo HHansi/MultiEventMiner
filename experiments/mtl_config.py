@@ -38,6 +38,7 @@ config = {
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"
     'early_stopping_patience': 10,
+    'label_format': "binary",   # "iob", "binary"
 
     'text_label_list': ["0", "1"],
     'token_label_list': ["0", "1"],
