@@ -3,10 +3,12 @@ import logging
 import os
 
 from algo.models.classification_model import ClassificationModel
+from algo.models.mtl_model import MTLModel
 from algo.models.ner_model import NERModel
 from algo.util.file_util import delete_create_folder
 from experiments import classifier_config
 from experiments import ner_config
+from experiments import mtl_config
 from farm.conversion.transformers import Converter
 from farm.data_handler.processor import TextClassificationProcessor
 from farm.modeling.tokenization import Tokenizer
@@ -72,6 +74,31 @@ def train_ner(data_dir, config):
         model.train_model(data_dir)
 
 
+def train_mtl_model(data_dir, config):
+    delete_create_folder(mtl_config.OUTPUT_DIRECTORY)
+    base_model_dir = config['model_dir']
+    base_train_progress_file_name = config['train_progress_file']
+    base_file_name_splits = os.path.splitext(base_train_progress_file_name)
+
+    for i in config["fold_ids"]:
+        # update model dir for the fold
+        config['model_dir'] = f"{base_model_dir}_{i}"
+        config['train_progress_file'] = os.path.join(os.path.dirname(config['train_progress_file']),
+                                                     f"{base_file_name_splits[0]}_{i}{base_file_name_splits[1]}")
+
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
+
+        if mtl_config.MODEL_NAME is not None:
+            model = MTLModel(mtl_config.MODEL_NAME, args=config)
+        else:
+            if mtl_config.MODEL_DIRECTORY is None:
+                raise ValueError(f"Neither model name nor directory is defined!")
+            else:
+                model = MTLModel(os.path.join(mtl_config.MODEL_DIRECTORY, f"model_{i}"), args=config)
+        logger.info(f"Training model for fold {i}...")
+        model.train_model(data_dir)
+
 # def convert():
 #     path = os.path.join(classifier_config.MODEL_DIRECTORY, f"model_0")
 #     model = Converter.convert_from_transformers(path, device="cpu")
@@ -101,5 +128,9 @@ if __name__ == '__main__':
 
     # train ner
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
-    data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format/split_binary')
-    train_ner(data_dir, ner_config.config)
+    # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format/split_binary')
+    # train_ner(data_dir, ner_config.config)
+
+    # train mtl
+    data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'joint_data')
+    train_mtl_model(data_dir, mtl_config.config)
