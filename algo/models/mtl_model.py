@@ -157,9 +157,9 @@ class MTLModel:
         raw_label_predictions_list, raw_tokens_predictions_list = [], []
         for idx, chunk_res in enumerate(result):
             if idx % 2 == 0:
-                raw_label_predictions_list += chunk_res["predictions"]
+                raw_label_predictions_list += (chunk_res[0])["predictions"]
             else:
-                raw_tokens_predictions_list += chunk_res["predictions"]
+                raw_tokens_predictions_list += (chunk_res[0])["predictions"]
 
         label_predictions = [x['label'] for x in raw_label_predictions_list]
 
