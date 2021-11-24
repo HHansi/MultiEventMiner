@@ -5,6 +5,8 @@ from pathlib import Path
 
 from sklearn.metrics import f1_score
 
+from algo.models.common.eval import token_macro_f1
+from algo.models.common.ner_util import to_iob, to_binary
 from algo.models.config.model_args import NERModelArgs
 from farm.data_handler.data_silo import DataSilo
 from farm.data_handler.processor import NERProcessor
@@ -21,11 +23,11 @@ from farm.utils import initialize_device_settings
 logger = logging.getLogger(__name__)
 
 
-def token_macro_f1(y_true, y_pred):
-    f1_scores = []
-    for t, p in zip(y_true, y_pred):
-        f1_scores.append(f1_score(t, p, average="macro"))
-    return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
+# def token_macro_f1(y_true, y_pred):
+#     f1_scores = []
+#     for t, p in zip(y_true, y_pred):
+#         f1_scores.append(f1_score(t, p, average="macro"))
+#     return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
 
 
 class NERModel:
@@ -151,9 +153,9 @@ class NERModel:
             raw_predictions += chunk_res["predictions"]
 
         if self.args.label_format == "iob":
-            predictions = self.to_iob(texts, raw_predictions)
+            predictions = to_iob(texts, raw_predictions)
         elif self.args.label_format == "binary":
-            predictions = self.to_binary(texts, raw_predictions)
+            predictions = to_binary(texts, raw_predictions)
         else:
             raise KeyError(f"Label output format is not defined!")
         return predictions, raw_predictions
@@ -163,49 +165,49 @@ class NERModel:
         args.load(input_dir)
         return args
 
-    @staticmethod
-    def to_iob(sentences, predictions):
-        """
-        Convert raw NER output to IOB2 format
-        :param sentences: list of dict {'text': "sample text"}
-        :param predictions: list of dict {'start': i, 'end': j, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
-        :return: list
-            list of list which contains IOB tags
-        """
-        iob_outputs = []
-        for idx, sample_labels in enumerate(predictions):
-            indices = [(ele.start(), ele.end()) for ele in re.finditer(r'\S+', sentences[idx]["text"])]
-            iob_output = ["O" for index in indices]
-            for label in sample_labels:
-                if label['label'] in ["[PAD]", "X"]:
-                    continue
-                for i, ind in enumerate(indices):
-                    if ind[0] == label['start']:
-                        iob_output[i] = f"B-{label['label']}"
-                        if ind[1] != label['end']:
-                            end_word_index = 0
-                            for j in range(i + 1, len(indices)):
-                                if indices[j][1] == label['end']:
-                                    end_word_index = j
-                                    break
-                            if end_word_index == 0:
-                                raise ValueError(f"Span index error found in output: {label}")
-                            for i_index in range(i + 1, end_word_index + 1):
-                                iob_output[i_index] = f"I-{label['label']}"
-                        break
-            iob_outputs.append(iob_output)
-        return iob_outputs
-
-    @staticmethod
-    def to_binary(sentence, predictions):
-        binary_outputs = []
-        for idx, sample_labels in enumerate(predictions):
-            binary_output = []
-            for label in sample_labels:
-                label_val = label['label']
-                binary_output.append(0 if label_val in ["[PAD]", "X"] else int(label_val))
-            binary_outputs.append(binary_output)
-        return binary_outputs
+    # @staticmethod
+    # def to_iob(sentences, predictions):
+    #     """
+    #     Convert raw NER output to IOB2 format
+    #     :param sentences: list of dict {'text': "sample text"}
+    #     :param predictions: list of dict {'start': i, 'end': j, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
+    #     :return: list
+    #         list of list which contains IOB tags
+    #     """
+    #     iob_outputs = []
+    #     for idx, sample_labels in enumerate(predictions):
+    #         indices = [(ele.start(), ele.end()) for ele in re.finditer(r'\S+', sentences[idx]["text"])]
+    #         iob_output = ["O" for index in indices]
+    #         for label in sample_labels:
+    #             if label['label'] in ["[PAD]", "X"]:
+    #                 continue
+    #             for i, ind in enumerate(indices):
+    #                 if ind[0] == label['start']:
+    #                     iob_output[i] = f"B-{label['label']}"
+    #                     if ind[1] != label['end']:
+    #                         end_word_index = 0
+    #                         for j in range(i + 1, len(indices)):
+    #                             if indices[j][1] == label['end']:
+    #                                 end_word_index = j
+    #                                 break
+    #                         if end_word_index == 0:
+    #                             raise ValueError(f"Span index error found in output: {label}")
+    #                         for i_index in range(i + 1, end_word_index + 1):
+    #                             iob_output[i_index] = f"I-{label['label']}"
+    #                     break
+    #         iob_outputs.append(iob_output)
+    #     return iob_outputs
+    #
+    # @staticmethod
+    # def to_binary(sentence, predictions):
+    #     binary_outputs = []
+    #     for idx, sample_labels in enumerate(predictions):
+    #         binary_output = []
+    #         for label in sample_labels:
+    #             label_val = label['label']
+    #             binary_output.append(0 if label_val in ["[PAD]", "X"] else int(label_val))
+    #         binary_outputs.append(binary_output)
+    #     return binary_outputs
 
 
 
