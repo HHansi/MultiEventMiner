@@ -43,8 +43,8 @@ config = {
     # 'label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
     #               "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
     # 'label_list': ["O", "B-MISC", "I-MISC", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "B-OTH", "I-OTH"],
-    'train_filename': "en-train.txt",  # "en-train.txt"
-    'dev_filename': None,  # "valid.txt"
+    # 'train_filename': "en-train.txt",  # "en-train.txt"  # given languages, this will be automatically set
+    # 'dev_filename': None,  # "valid.txt"
     'dev_split': 0.1,
     'delimiter': "\t",  # " "
     'max_processes': 128,  # 128 is default

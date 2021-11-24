@@ -39,7 +39,7 @@ config = {
     'early_stopping_patience': 10,
 
     'label_list': ["0", "1"],
-    'train_filename': "en-train.tsv",
+    # 'train_filename': "en-train.tsv",  # given languages, this will be automatically set
     'dev_split': 0.1,
     'dev_stratification': True,
     'delimiter': "\t",

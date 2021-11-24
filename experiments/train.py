@@ -9,6 +9,9 @@ from algo.util.file_util import delete_create_folder
 from experiments import classifier_config
 from experiments import ner_config
 from experiments import mtl_config
+from experiments.data_config import SENTENCE_TRAIN_DATA_FILE, SENTENCE_DEV_DATA_FILE, TOKEN_TRAIN_DATA_FILE, \
+    TOKEN_DEV_DATA_FILE
+from experiments.data_process.format_data import prepare_multilingual_sentence_data
 from farm.conversion.transformers import Converter
 from farm.data_handler.processor import TextClassificationProcessor
 from farm.modeling.tokenization import Tokenizer
@@ -32,8 +35,27 @@ def train_classifier(data_dir, config):
         config['train_progress_file'] = os.path.join(os.path.dirname(config['train_progress_file']),
                                                      f"{base_file_name_splits[0]}_{i}{base_file_name_splits[1]}")
 
-        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
+        # set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        # logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
+
+        seed = int(config['manual_seed'] * (i + 1))
+        set_all_seeds(seed=seed)
+        logger.info(f"Set seed to {seed}.")
+
+        # handle multilingual scenario
+        if len(classifier_config.LANGUAGES) > 0:
+            new_data_dir = os.path.join(classifier_config.OUTPUT_DIRECTORY, f"data_{seed}")
+            delete_create_folder(new_data_dir)
+            prepare_multilingual_sentence_data(classifier_config.LANGUAGES, data_dir, new_data_dir, config['dev_split'], seed)
+            config['train_filename'] = SENTENCE_TRAIN_DATA_FILE
+            logger.info(f"train_filename set to {config['train_filename']}")
+            config['dev_filename'] = SENTENCE_DEV_DATA_FILE
+            logger.info(f"dev_filename set to {config['dev_filename']}")
+
+            data_dir = new_data_dir
+        else:
+            config['train_filename'] = f"{classifier_config.LANGUAGES[0]}-train.tsv"
+            logger.info(f"train_filename set to {config['train_filename']}")
 
         if classifier_config.MODEL_NAME is not None:
             model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
@@ -60,8 +82,27 @@ def train_ner(data_dir, config):
         config['train_progress_file'] = os.path.join(os.path.dirname(config['train_progress_file']),
                                                      f"{base_file_name_splits[0]}_{i}{base_file_name_splits[1]}")
 
-        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
+        # set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        # logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}.")
+
+        seed = int(config['manual_seed'] * (i + 1))
+        set_all_seeds(seed=seed)
+        logger.info(f"Set seed to {seed}.")
+
+        # handle multilingual scenario
+        if len(ner_config.LANGUAGES) > 0:
+            new_data_dir = os.path.join(ner_config.OUTPUT_DIRECTORY, f"data_{seed}")
+            delete_create_folder(new_data_dir)
+            prepare_multilingual_sentence_data(ner_config.LANGUAGES, data_dir, new_data_dir, config['dev_split'], seed)
+            config['train_filename'] = TOKEN_TRAIN_DATA_FILE
+            logger.info(f"train_filename set to {config['train_filename']}")
+            config['dev_filename'] = TOKEN_DEV_DATA_FILE
+            logger.info(f"dev_filename set to {config['dev_filename']}")
+
+            data_dir = new_data_dir
+        else:
+            config['train_filename'] = f"{ner_config.LANGUAGES[0]}-train.txt"
+            logger.info(f"train_filename set to {config['train_filename']}")
 
         if ner_config.MODEL_NAME is not None:
             model = NERModel(ner_config.MODEL_NAME, args=config)
