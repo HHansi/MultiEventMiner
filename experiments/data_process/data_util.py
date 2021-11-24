@@ -58,6 +58,13 @@ def read_tokens(path, train=True):
         return tokens, None
 
 
+def read_tokens_farm_format(path):
+    data = read_ner_file(path)
+    tokens = [x['text'].split() for x in data]
+    labels = [x['ner_label'] for x in data]
+    return tokens, labels
+
+
 def save_tokens(tokens, labels, path):
     with open(path, "w", encoding="utf-8") as f:
         for tokens, labels in zip(tokens, labels):
