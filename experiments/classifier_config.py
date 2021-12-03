@@ -15,9 +15,9 @@ SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
 
 # Either one (model name or directory) should be provided. Other should be set to None.
 # If both provided, only the model name will be considered.
-MODEL_NAME = "bert-large-cased"
+MODEL_NAME = "xlm-roberta-large"
 MODEL_DIRECTORY = ""  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
-LANGUAGES = ["en"]
+LANGUAGES = ["en", "pr"]
 
 config = {
     'manual_seed': SEED,
@@ -30,7 +30,7 @@ config = {
     'train_batch_size': 8,
     'eval_batch_size': 8,
     'inference_batch_size': 16,  # 4
-    'evaluate_every': 200,  # 4
+    'evaluate_every': 250,  # 4
     'learning_rate': 1e-5,  # 3e-5
     'metric': ["f1_macro", "acc"],
     'use_early_stopping': True,
@@ -48,8 +48,8 @@ config = {
     'max_processes': 128,  # 128 is default
     'use_amp': None,
 
-    'n_fold': 1,
-    'fold_ids': [0],  # list of ids for folds
+    'n_fold': 5,
+    'fold_ids': [0, 1, 2, 3, 4],  # list of ids for folds
 
     # for inferencer
     'gpu': True,
