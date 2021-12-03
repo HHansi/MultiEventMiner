@@ -26,6 +26,8 @@ def train_classifier(data_dir, config):
     base_model_dir = config['model_dir']
     base_train_progress_file_name = config['train_progress_file']
     base_file_name_splits = os.path.splitext(base_train_progress_file_name)
+    base_data_dir = data_dir  # keep a record of the original file, as data_dir will be changed per fold when handling
+    # multilingual scenario
 
     for i in config["fold_ids"]:
         # update model dir for the fold
@@ -46,7 +48,7 @@ def train_classifier(data_dir, config):
         if len(classifier_config.LANGUAGES) > 1:
             new_data_dir = os.path.join(classifier_config.OUTPUT_DIRECTORY, f"data_{seed}")
             delete_create_folder(new_data_dir)
-            prepare_multilingual_sentence_data(classifier_config.LANGUAGES, data_dir, new_data_dir, config['dev_split'], seed)
+            prepare_multilingual_sentence_data(classifier_config.LANGUAGES, base_data_dir, new_data_dir, config['dev_split'], seed)
             config['train_filename'] = SENTENCE_TRAIN_DATA_FILE
             logger.info(f"train_filename set to {config['train_filename']}")
             config['dev_filename'] = SENTENCE_DEV_DATA_FILE
@@ -175,3 +177,4 @@ if __name__ == '__main__':
     # train mtl
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'joint_data')
     # train_mtl_model(data_dir, mtl_config.config)
+
