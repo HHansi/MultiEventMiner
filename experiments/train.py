@@ -43,7 +43,7 @@ def train_classifier(data_dir, config):
         logger.info(f"Set seed to {seed}.")
 
         # handle multilingual scenario
-        if len(classifier_config.LANGUAGES) > 0:
+        if len(classifier_config.LANGUAGES) > 1:
             new_data_dir = os.path.join(classifier_config.OUTPUT_DIRECTORY, f"data_{seed}")
             delete_create_folder(new_data_dir)
             prepare_multilingual_sentence_data(classifier_config.LANGUAGES, data_dir, new_data_dir, config['dev_split'], seed)
