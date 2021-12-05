@@ -387,11 +387,11 @@ def predict_mtl(args, test_folder_path, type='sentence'):
 
 
 if __name__ == '__main__':
-    # predict_classifier(classifier_config.config)
+    predict_classifier(classifier_config.config)
 
     # predict_ner(ner_config.config)
 
-    predict_ner_binary(ner_config.config)
+    # predict_ner_binary(ner_config.config)
 
     # test_folder_path = os.path.join(classifier_config.DATA_DIRECTORY, "subtask2-sentence")
     # mtl_config.SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
