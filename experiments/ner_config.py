@@ -15,9 +15,9 @@ SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.txt')
 
 # Either one (model name or directory) should be provided. Other should be set to None.
 # If both provided, only the model name will be considered.
-MODEL_NAME = "bert-large-cased"
+MODEL_NAME = "xlm-roberta-large"
 MODEL_DIRECTORY = ""  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
-LANGUAGES = ["en"]
+LANGUAGES = ["en", "pr"]
 
 config = {
     'manual_seed': SEED,
@@ -32,16 +32,16 @@ config = {
     'inference_batch_size': 16,  # 2
     'evaluate_every': 30,  # 1
     'learning_rate': 1e-5,
-    'metric': "token_f1",  # "seq_f1"
+    'metric': "seq_f1",  # "seq_f1", "token_f1"
     'use_early_stopping': True,
     'early_stopping_metric': "loss",
     'early_stopping_mode': "min",  # "min" or "max"
     'early_stopping_patience': 10,
-    'label_format': "binary",   # "iob", "binary"
+    'label_format': "iob",   # "iob", "binary"
 
-    'label_list': ["0", "1"],
-    # 'label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
-    #               "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
+    #'label_list': ["0", "1"],
+    'label_list': ["O", "B-trigger", "I-trigger", "B-target", "I-target", "B-place", "I-place", "B-etime", "I-etime",
+                  "B-fname", "I-fname", "B-participant", "I-participant", "B-organizer", "I-organizer"],
     # 'label_list': ["O", "B-MISC", "I-MISC", "B-PER", "I-PER", "B-ORG", "I-ORG", "B-LOC", "I-LOC", "B-OTH", "I-OTH"],
     # 'train_filename': "en-train.txt",  # "en-train.txt"  # given languages, this will be automatically set
     # 'dev_filename': None,  # "valid.txt"
@@ -50,8 +50,8 @@ config = {
     'max_processes': 128,  # 128 is default
     'use_amp': None,
 
-    'n_fold': 1,
-    'fold_ids': [0],  # list of ids for folds
+    'n_fold': 5,
+    'fold_ids': [0, 1, 2, 3, 4],  # list of ids for folds
 
     # for inferencer
     'gpu': True,
