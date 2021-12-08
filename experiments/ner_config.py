@@ -17,7 +17,7 @@ SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.txt')
 # If both provided, only the model name will be considered.
 MODEL_NAME = "xlm-roberta-large"
 MODEL_DIRECTORY = ""  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
-LANGUAGES = ["en", "es"]
+LANGUAGES = ["en", "es", "pr"]
 
 config = {
     'manual_seed': SEED,
