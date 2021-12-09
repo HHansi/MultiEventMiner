@@ -7,7 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 from nltk import sent_tokenize, word_tokenize
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from sklearn.utils import shuffle
 from tqdm import tqdm
 
@@ -233,67 +233,87 @@ def format_multi_task_data(sentence_data_path, token_data_path, output_path):
     df.to_csv(output_path, index=False, encoding="utf-8")
 
 
-def prepare_multilingual_sentence_data(languages, input_folder, output_folder, dev_split, seed):
-    data_dict = dict()  # {lang:data frame}
-    data_sizes_dict = dict()  # {lang:size}
-    logger.info(f"Preparing multilingual sentence data..")
-    for lang in languages:
-        file_path = os.path.join(input_folder, f"{lang}-train.tsv")
-        df = pd.read_csv(file_path, sep='\t')
-        data_dict[lang] = df
-        data_sizes_dict[lang] = df.shape[0]
-        logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
+def split_sentence_data(data_file_path, seed, args, output_folder=None):
+    data = pd.read_csv(data_file_path, sep=args['delimiter'])
+    if args['dev_stratification']:
+        if args['label_column_name'] is None:
+            raise ValueError(f"Label column should be provided for dev stratification!")
+        y = data[args['label_column_name']]
+        sss = StratifiedShuffleSplit(n_splits=1, test_size=args['dev_split'], random_state=seed)
+        train_index, test_index = next(sss.split(data, y))
 
-    total_instances = sum(data_sizes_dict.values())
-    logger.info(f"Total instances: {total_instances}")
-    dev_instances = round(total_instances * dev_split)
-    logger.info(f"Targeted dev instance: {dev_instances}")
+        train = data.iloc[train_index]
+        dev = data.iloc[test_index]
+    else:
+        train, dev = train_test_split(data, test_size=dev_split, random_state=seed)
 
+    logger.info(f"Train instances: {train.shape[0]}")
+    logger.info(f"Dev instances: {dev.shape[0]}")
+    if output_folder:
+        train.to_csv(os.path.join(output_folder, SENTENCE_TRAIN_DATA_FILE), sep=args['delimiter'], index=False)
+        logger.info(f"Saved {train.shape[0]} train instances.")
+        dev.to_csv(os.path.join(output_folder, SENTENCE_DEV_DATA_FILE), sep=args['delimiter'], index=False)
+        logger.info(f"Saved {dev.shape[0]} dev instances.")
+    return train, dev
+
+
+def split_token_data(data_file_path, seed, args, output_folder=None):
+    data = read_ner_file(data_file_path)
+    train, dev = train_test_split(data, test_size=args['dev_split'], random_state=seed)
+
+    logger.info(f"Train instances: {len(train)}")
+    logger.info(f"Dev instances: {len(dev)}")
+    if output_folder:
+        train_sentences = [x['text'].split() for x in train]
+        train_labels = [x['ner_label'] for x in train]
+        dev_sentences = [x['text'].split() for x in dev]
+        dev_labels = [x['ner_label'] for x in dev]
+
+        for idx, sent in enumerate(train_sentences):
+            if len(sent) != len(train_labels[idx]):
+                raise IndexError(f"Train sentence and label mismatch!")
+        for idx, sent in enumerate(dev_sentences):
+            if len(sent) != len(dev_labels[idx]):
+                raise IndexError(f"Dev sentence and label mismatch!")
+
+        save_tokens_farm_format(train_sentences, train_labels, os.path.join(output_folder, TOKEN_TRAIN_DATA_FILE))
+        logger.info(f"Saved {len(train_sentences)} train instances.")
+        save_tokens_farm_format(dev_sentences, dev_labels, os.path.join(output_folder, TOKEN_DEV_DATA_FILE))
+        logger.info(f"Saved {len(dev_sentences)} dev instances.")
+    return train, dev
+
+
+def prepare_multilingual_sentence_data(languages, input_folder, seed, args, output_folder=None):
     train = pd.DataFrame(columns=['id', 'label', 'text'])
     dev = pd.DataFrame(columns=['id', 'label', 'text'])
+
     for lang in languages:
         logger.info(f"Splitting {lang}..")
-        temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
-        logger.info(f"Dev count: {temp_dev_count}")
-        temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
+        file_path = os.path.join(input_folder, f"{lang}-train.tsv")
+        temp_train, temp_dev = split_sentence_data(file_path, seed, args, output_folder=None)
         train = train.append(temp_train)
         dev = dev.append(temp_dev)
 
     # shuffle train and dev sets
-    # train = train.sample(frac=1).reset_index(drop=True)
-    # dev = dev.sample(frac=1).reset_index(drop=True)
     train = shuffle(train, random_state=seed)
     dev = shuffle(dev, random_state=seed)
 
-    train.to_csv(os.path.join(output_folder, SENTENCE_TRAIN_DATA_FILE), sep='\t', index=False)
-    logger.info(f"Saved {train.shape[0]} train instances.")
-    dev.to_csv(os.path.join(output_folder, SENTENCE_DEV_DATA_FILE), sep='\t', index=False)
-    logger.info(f"Saved {dev.shape[0]} dev instances.")
+    if output_folder:
+        train.to_csv(os.path.join(output_folder, SENTENCE_TRAIN_DATA_FILE), sep=args['delimiter'], index=False)
+        logger.info(f"Saved {train.shape[0]} train instances.")
+        dev.to_csv(os.path.join(output_folder, SENTENCE_DEV_DATA_FILE), sep=args['delimiter'], index=False)
+        logger.info(f"Saved {dev.shape[0]} dev instances.")
+    return train, dev
 
 
-def prepare_multilingual_token_data(languages, input_folder, output_folder, dev_split, seed):
-    data_dict = dict()  # {lang:data frame}
-    data_sizes_dict = dict()  # {lang:size}
-    logger.info(f"Preparing multilingual token data..")
-    for lang in languages:
-        file_path = os.path.join(input_folder, f"{lang}-train.txt")
-        data = read_ner_file(file_path)
-        data_dict[lang] = data
-        data_sizes_dict[lang] = len(data)
-        logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
-
-    total_instances = sum(data_sizes_dict.values())
-    logger.info(f"Total instances: {total_instances}")
-    dev_instances = round(total_instances * dev_split)
-    logger.info(f"Targeted dev instance: {dev_instances}")
-
+def prepare_multilingual_token_data(languages, input_folder, seed, args, output_folder=None):
     train = []
     dev = []
+
     for lang in languages:
         logger.info(f"Splitting {lang}..")
-        temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
-        logger.info(f"Dev count: {temp_dev_count}")
-        temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
+        file_path = os.path.join(input_folder, f"{lang}-train.txt")
+        temp_train, temp_dev = split_sentence_data(file_path, seed, args, output_folder=None)
         train.extend(temp_train)
         dev.extend(temp_dev)
 
@@ -301,22 +321,111 @@ def prepare_multilingual_token_data(languages, input_folder, output_folder, dev_
     train = shuffle(train, random_state=seed)
     dev = shuffle(dev, random_state=seed)
 
-    train_sentences = [x['text'].split() for x in train]
-    train_labels = [x['ner_label'] for x in train]
-    dev_sentences = [x['text'].split() for x in dev]
-    dev_labels = [x['ner_label'] for x in dev]
+    if output_folder:
+        train_sentences = [x['text'].split() for x in train]
+        train_labels = [x['ner_label'] for x in train]
+        dev_sentences = [x['text'].split() for x in dev]
+        dev_labels = [x['ner_label'] for x in dev]
 
-    for idx, sent in enumerate(train_sentences):
-        if len(sent) != len(train_labels[idx]):
-            raise IndexError(f"Train sentence and label mismatch!")
-    for idx, sent in enumerate(dev_sentences):
-        if len(sent) != len(dev_labels[idx]):
-            raise IndexError(f"Dev sentence and label mismatch!")
+        for idx, sent in enumerate(train_sentences):
+            if len(sent) != len(train_labels[idx]):
+                raise IndexError(f"Train sentence and label mismatch!")
+        for idx, sent in enumerate(dev_sentences):
+            if len(sent) != len(dev_labels[idx]):
+                raise IndexError(f"Dev sentence and label mismatch!")
 
-    save_tokens_farm_format(train_sentences, train_labels, os.path.join(output_folder, TOKEN_TRAIN_DATA_FILE))
-    logger.info(f"Saved {len(train_sentences)} train instances.")
-    save_tokens_farm_format(dev_sentences, dev_labels, os.path.join(output_folder, TOKEN_DEV_DATA_FILE))
-    logger.info(f"Saved {len(dev_sentences)} dev instances.")
+        save_tokens_farm_format(train_sentences, train_labels, os.path.join(output_folder, TOKEN_TRAIN_DATA_FILE))
+        logger.info(f"Saved {len(train_sentences)} train instances.")
+        save_tokens_farm_format(dev_sentences, dev_labels, os.path.join(output_folder, TOKEN_DEV_DATA_FILE))
+        logger.info(f"Saved {len(dev_sentences)} dev instances.")
+    return train, dev
+
+
+
+# def prepare_multilingual_sentence_data(languages, input_folder, output_folder, dev_split, seed):
+#     data_dict = dict()  # {lang:data frame}
+#     data_sizes_dict = dict()  # {lang:size}
+#     logger.info(f"Preparing multilingual sentence data..")
+#     for lang in languages:
+#         file_path = os.path.join(input_folder, f"{lang}-train.tsv")
+#         df = pd.read_csv(file_path, sep='\t')
+#         data_dict[lang] = df
+#         data_sizes_dict[lang] = df.shape[0]
+#         logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
+#
+#     total_instances = sum(data_sizes_dict.values())
+#     logger.info(f"Total instances: {total_instances}")
+#     dev_instances = round(total_instances * dev_split)
+#     logger.info(f"Targeted dev instance: {dev_instances}")
+#
+#     train = pd.DataFrame(columns=['id', 'label', 'text'])
+#     dev = pd.DataFrame(columns=['id', 'label', 'text'])
+#     for lang in languages:
+#         logger.info(f"Splitting {lang}..")
+#         temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
+#         logger.info(f"Dev count: {temp_dev_count}")
+#         temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
+#         train = train.append(temp_train)
+#         dev = dev.append(temp_dev)
+#
+#     # shuffle train and dev sets
+#     # train = train.sample(frac=1).reset_index(drop=True)
+#     # dev = dev.sample(frac=1).reset_index(drop=True)
+#     train = shuffle(train, random_state=seed)
+#     dev = shuffle(dev, random_state=seed)
+#
+#     train.to_csv(os.path.join(output_folder, SENTENCE_TRAIN_DATA_FILE), sep='\t', index=False)
+#     logger.info(f"Saved {train.shape[0]} train instances.")
+#     dev.to_csv(os.path.join(output_folder, SENTENCE_DEV_DATA_FILE), sep='\t', index=False)
+#     logger.info(f"Saved {dev.shape[0]} dev instances.")
+
+
+# def prepare_multilingual_token_data(languages, input_folder, output_folder, dev_split, seed):
+#     data_dict = dict()  # {lang:data frame}
+#     data_sizes_dict = dict()  # {lang:size}
+#     logger.info(f"Preparing multilingual token data..")
+#     for lang in languages:
+#         file_path = os.path.join(input_folder, f"{lang}-train.txt")
+#         data = read_ner_file(file_path)
+#         data_dict[lang] = data
+#         data_sizes_dict[lang] = len(data)
+#         logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
+#
+#     total_instances = sum(data_sizes_dict.values())
+#     logger.info(f"Total instances: {total_instances}")
+#     dev_instances = round(total_instances * dev_split)
+#     logger.info(f"Targeted dev instance: {dev_instances}")
+#
+#     train = []
+#     dev = []
+#     for lang in languages:
+#         logger.info(f"Splitting {lang}..")
+#         temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
+#         logger.info(f"Dev count: {temp_dev_count}")
+#         temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
+#         train.extend(temp_train)
+#         dev.extend(temp_dev)
+#
+#     # shuffle train and dev sets
+#     train = shuffle(train, random_state=seed)
+#     dev = shuffle(dev, random_state=seed)
+#
+#     train_sentences = [x['text'].split() for x in train]
+#     train_labels = [x['ner_label'] for x in train]
+#     dev_sentences = [x['text'].split() for x in dev]
+#     dev_labels = [x['ner_label'] for x in dev]
+#
+#     for idx, sent in enumerate(train_sentences):
+#         if len(sent) != len(train_labels[idx]):
+#             raise IndexError(f"Train sentence and label mismatch!")
+#     for idx, sent in enumerate(dev_sentences):
+#         if len(sent) != len(dev_labels[idx]):
+#             raise IndexError(f"Dev sentence and label mismatch!")
+#
+#     save_tokens_farm_format(train_sentences, train_labels, os.path.join(output_folder, TOKEN_TRAIN_DATA_FILE))
+#     logger.info(f"Saved {len(train_sentences)} train instances.")
+#     save_tokens_farm_format(dev_sentences, dev_labels, os.path.join(output_folder, TOKEN_DEV_DATA_FILE))
+#     logger.info(f"Saved {len(dev_sentences)} dev instances.")
 
 
 if __name__ == '__main__':
