@@ -49,7 +49,7 @@ def train_classifier(data_dir, config):
 
         # handle monolingual scenario
         else:
-            split_sentence_data(base_data_dir, seed, config, output_folder=new_data_dir)
+            split_sentence_data(os.path.join(base_data_dir, f"{classifier_config.LANGUAGES[0]}-train.tsv"), seed, config, output_folder=new_data_dir)
 
         # update train, dev file names
         config['train_filename'] = SENTENCE_TRAIN_DATA_FILE
