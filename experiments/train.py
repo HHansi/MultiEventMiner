@@ -21,6 +21,8 @@ from farm.utils import set_all_seeds
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 def train_classifier(data_dir, config):
     delete_create_folder(classifier_config.OUTPUT_DIRECTORY)
