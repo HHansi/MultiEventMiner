@@ -74,7 +74,7 @@ def initialize_device_settings(use_cuda, local_rank=-1, use_amp=None):
         device = torch.device("cpu")
         n_gpu = 0
     elif local_rank == -1:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         if not torch.cuda.is_available():
             n_gpu = 0
         else:

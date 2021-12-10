@@ -28,7 +28,7 @@ class ClassificationModel:
             self.args = args
 
         # set_all_seeds(seed=self.args.manual_seed)
-        self.device, self.n_gpu = initialize_device_settings(use_cuda=self.args.use_cuda, use_amp=self.args.use_amp, local_rank=1)
+        self.device, self.n_gpu = initialize_device_settings(use_cuda=self.args.use_cuda, use_amp=self.args.use_amp)
 
     def train_model(self, data_dir):
         # create tokenizer
