@@ -49,6 +49,7 @@ config = {
     'delimiter': "\t",  # " "
     'max_processes': 128,  # 128 is default
     'use_amp': None,
+    'cude_device': 1,  # or None
 
     'n_fold': 5,
     'fold_ids': [0, 1, 2, 3, 4],  # list of ids for folds

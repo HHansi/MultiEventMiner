@@ -21,10 +21,14 @@ from farm.utils import set_all_seeds
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def train_classifier(data_dir, config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     delete_create_folder(classifier_config.OUTPUT_DIRECTORY)
     base_model_dir = config['model_dir']
     base_train_progress_file_name = config['train_progress_file']
@@ -71,6 +75,10 @@ def train_classifier(data_dir, config):
 
 
 def train_ner(data_dir, config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     delete_create_folder(ner_config.OUTPUT_DIRECTORY)
     base_model_dir = config['model_dir']
     base_train_progress_file_name = config['train_progress_file']
@@ -120,6 +128,10 @@ def train_ner(data_dir, config):
 
 
 def train_mtl_model(data_dir, config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     delete_create_folder(mtl_config.OUTPUT_DIRECTORY)
     base_model_dir = config['model_dir']
     base_train_progress_file_name = config['train_progress_file']
