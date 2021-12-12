@@ -58,7 +58,7 @@ config = {
             
     'max_processes': 128,  # 128 is default
     'use_amp': None,
-    'cude_device': 1,  # or None
+    'cude_device': "1",  # or None
 
     'n_fold': 1,
     'fold_ids': [0],  # list of ids for folds
