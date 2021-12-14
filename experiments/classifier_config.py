@@ -50,7 +50,7 @@ config = {
     'cude_device': "1",  # or None
 
     'n_fold': 5,
-    'fold_ids': [0, 1],  # list of ids for folds
+    'fold_ids': [0, 1, 2, 3, 4],  # list of ids for folds
 
     # for inferencer
     'gpu': True,
