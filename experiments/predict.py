@@ -92,7 +92,11 @@ def labels_to_iob(labels):
     return iob_labels
 
 
-def predict_classifier(args):
+def predict_classifier(config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     create_folder_if_not_exist(classifier_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in classifier_config.LANGUAGES:
@@ -104,17 +108,17 @@ def predict_classifier(args):
         test_sentences = test_df[['text']].to_dict(orient='records')
         logger.info(f"{len(test_sentences)} test sentences are loaded.")
 
-        test_preds = np.zeros((len(test_sentences), args["n_fold"]))
+        test_preds = np.zeros((len(test_sentences), config["n_fold"]))
         test_instances[lang] = TestInstanceClassifier(lang, test_df, test_sentences, test_preds)
 
-    base_model_dir = args['model_dir']
-    for i in range(args["n_fold"]):
-        args['model_dir'] = f"{base_model_dir}_{i}"
+    base_model_dir = config['model_dir']
+    for i in range(config["n_fold"]):
+        config['model_dir'] = f"{base_model_dir}_{i}"
 
-        set_all_seeds(seed=int(args['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(args['manual_seed'] * (i + 1))}")
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}")
 
-        model = ClassificationModel(classifier_config.MODEL_NAME, args=args)
+        model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
@@ -142,7 +146,11 @@ def predict_classifier(args):
                 f.write("%s\n" % item)
 
 
-def predict_ner(args):
+def predict_ner(config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     create_folder_if_not_exist(ner_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in ner_config.LANGUAGES:
@@ -156,14 +164,14 @@ def predict_ner(args):
         test_preds = []  # [[fold_0 predictions], ... [fold_n predictions]]
         test_instances[lang] = TestInstanceNER(lang, test_tokens, dict_instance_sentence, test_sentences, test_preds)
 
-    base_model_dir = args['model_dir']
-    for i in range(args["n_fold"]):
-        args['model_dir'] = f"{base_model_dir}_{i}"
+    base_model_dir = config['model_dir']
+    for i in range(config["n_fold"]):
+        config['model_dir'] = f"{base_model_dir}_{i}"
 
-        set_all_seeds(seed=int(args['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(args['manual_seed'] * (i + 1))}")
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}")
 
-        model = NERModel(ner_config.MODEL_NAME, args=args)
+        model = NERModel(ner_config.MODEL_NAME, args=config)
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
@@ -175,7 +183,7 @@ def predict_ner(args):
     for lang in test_instances.keys():
         # select majority class for each token in each sentence
         logger.info(f"Calculating majority class for {lang}...")
-        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, args["n_fold"])
+        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
         final_preds = labels_to_iob(final_preds)
 
         # merge split sentences
@@ -201,7 +209,11 @@ def predict_ner(args):
                 f.write("\n")
 
 
-def predict_ner_binary(args):
+def predict_ner_binary(config):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     create_folder_if_not_exist(ner_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in ner_config.LANGUAGES:
@@ -215,14 +227,14 @@ def predict_ner_binary(args):
         test_preds = []  # [[fold_0 predictions], ... [fold_n predictions]]
         test_instances[lang] = TestInstanceNERBinary(lang, tokens, test_sentences, test_preds, labels)
 
-    base_model_dir = args['model_dir']
-    for i in range(args["n_fold"]):
-        args['model_dir'] = f"{base_model_dir}_{i}"
+    base_model_dir = config['model_dir']
+    for i in range(config["n_fold"]):
+        config['model_dir'] = f"{base_model_dir}_{i}"
 
-        set_all_seeds(seed=int(args['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(args['manual_seed'] * (i + 1))}")
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}")
 
-        model = NERModel(ner_config.MODEL_NAME, args=args)
+        model = NERModel(ner_config.MODEL_NAME, args=config)
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
@@ -238,7 +250,7 @@ def predict_ner_binary(args):
     for lang in test_instances.keys():
         # select majority class for each token in each sentence
         logger.info(f"Calculating majority class for {lang}...")
-        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, args["n_fold"])
+        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
 
         logger.info(f"Saving test predictions for {lang}...")
         submission_file_name = os.path.basename(ner_config.SUBMISSION_FILE)
@@ -250,10 +262,13 @@ def predict_ner_binary(args):
         logger.info(f"Evaluation of {lang}: \n {token_macro_f1(test_instances[lang].test_labels, final_preds)}")
 
 
-def predict_mtl(args, test_folder_path, type='sentence'):
-    """
+def predict_mtl(config, test_folder_path, type='sentence'):
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
 
-    :param args:
+    """
+    :param config:
     :param test_folder_path:
     :param type: str, optional
         defines the type of the data in the test data file
@@ -273,7 +288,7 @@ def predict_mtl(args, test_folder_path, type='sentence'):
             test_df['text'] = test_df['text'].apply(lambda x: preprocess_data(x))
             test_sentences = test_df[['text']].to_dict(orient='records')
 
-            test_preds = np.zeros((len(test_sentences), args["n_fold"]))
+            test_preds = np.zeros((len(test_sentences), config["n_fold"]))
             test_instances[lang] = TestInstanceClassifier(lang, test_df, test_sentences, test_preds)
 
         elif type == 'token-binary':
@@ -302,14 +317,14 @@ def predict_mtl(args, test_folder_path, type='sentence'):
 
         logger.info(f"{len(test_instances[lang].sentences)} test sentences are loaded.")
 
-    base_model_dir = args['model_dir']
-    for i in range(args["n_fold"]):
-        args['model_dir'] = f"{base_model_dir}_{i}"
+    base_model_dir = config['model_dir']
+    for i in range(config["n_fold"]):
+        config['model_dir'] = f"{base_model_dir}_{i}"
 
-        set_all_seeds(seed=int(args['manual_seed'] * (i + 1)))
-        logger.info(f"Set seed to {int(args['manual_seed'] * (i + 1))}")
+        set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
+        logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}")
 
-        model = MTLModel(mtl_config.MODEL_NAME, args=args)
+        model = MTLModel(mtl_config.MODEL_NAME, args=config)
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
@@ -348,7 +363,7 @@ def predict_mtl(args, test_folder_path, type='sentence'):
                     f.write("%s\n" % item)
 
         else:
-            final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, args["n_fold"])
+            final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
 
             submission_file_name = os.path.basename(ner_config.SUBMISSION_FILE)
             submission_file_name_splits = os.path.splitext(submission_file_name)
@@ -387,9 +402,9 @@ def predict_mtl(args, test_folder_path, type='sentence'):
 
 
 if __name__ == '__main__':
-    # predict_classifier(classifier_config.config)
+    predict_classifier(classifier_config.config)
 
-    predict_ner(ner_config.config)
+    # predict_ner(ner_config.config)
 
     # predict_ner_binary(ner_config.config)
 
