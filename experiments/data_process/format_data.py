@@ -313,7 +313,7 @@ def prepare_multilingual_token_data(languages, input_folder, seed, args, output_
     for lang in languages:
         logger.info(f"Splitting {lang}..")
         file_path = os.path.join(input_folder, f"{lang}-train.txt")
-        temp_train, temp_dev = split_sentence_data(file_path, seed, args, output_folder=None)
+        temp_train, temp_dev = split_token_data(file_path, seed, args, output_folder=None)
         train.extend(temp_train)
         dev.extend(temp_dev)
 
