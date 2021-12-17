@@ -10,7 +10,7 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
 # TEMP_DIRECTORY = "temp"
-PREDICTION_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, 'predictions')
+PREDICTION_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, 'predictions2')
 SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
 
 # Either one (model name or directory) should be provided. Other should be set to None.
