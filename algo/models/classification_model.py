@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ClassificationModel:
-    def __init__(self, model_name, args):
+    def __init__(self, model_name, args, mode='train'):
         self.model_name = model_name
         self.args = self._load_model_args(model_name)
 
@@ -29,6 +29,11 @@ class ClassificationModel:
 
         # set_all_seeds(seed=self.args.manual_seed)
         self.device, self.n_gpu = initialize_device_settings(use_cuda=self.args.use_cuda, use_amp=self.args.use_amp)
+
+        if mode == 'inference':
+            self.model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
+                                    max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                    num_processes=self.args.num_processes)
 
     def train_model(self, data_dir):
         # create tokenizer
@@ -129,11 +134,11 @@ class ClassificationModel:
             predictions- list of class labels
             raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
         """
-        model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
-                                max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
-                                num_processes=self.args.num_processes)
-        result = model.inference_from_dicts(dicts=texts)
-        model.close_multiprocessing_pool()
+        # model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
+        #                         max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+        #                         num_processes=self.args.num_processes)
+        result = self.model.inference_from_dicts(dicts=texts)
+        self.model.close_multiprocessing_pool()
 
         raw_predictions = []
         for idx, chunk_res in enumerate(result):

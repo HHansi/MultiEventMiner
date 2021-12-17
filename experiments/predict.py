@@ -118,7 +118,7 @@ def predict_classifier(config):
         set_all_seeds(seed=int(config['manual_seed'] * (i + 1)))
         logger.info(f"Set seed to {int(config['manual_seed'] * (i + 1))}")
 
-        model = ClassificationModel(classifier_config.MODEL_NAME, args=config)
+        model = ClassificationModel(classifier_config.MODEL_NAME, args=config, mode='inference')
 
         logger.info(f"Making test predictions for fold {i}...")
         for lang in test_instances.keys():
