@@ -17,7 +17,7 @@ SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
 # If both provided, only the model name will be considered.
 MODEL_NAME = "xlm-roberta-large"
 MODEL_DIRECTORY = None  #"/experiments/tranasinghe/MultiEventMiner/trained_models2/sentence/xlm-r-large-en-en"  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
-LANGUAGES = ["en", "pr"]
+LANGUAGES = ["en", "pr", "es"]
 
 config = {
     'manual_seed': SEED,
