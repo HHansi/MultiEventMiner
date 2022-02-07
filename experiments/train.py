@@ -179,13 +179,13 @@ def train_mtl_model(data_dir, config):
 
 if __name__ == '__main__':
     # train classifier
-    # data_dir = os.path.join(classifier_config.DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
-    # train_classifier(data_dir, classifier_config.config)
+    data_dir = os.path.join(classifier_config.DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
+    train_classifier(data_dir, classifier_config.config)
 
     # train ner
-    data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
+    # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'subtask4-token/filtered/farm_format/split_binary')
-    train_ner(data_dir, ner_config.config)
+    # train_ner(data_dir, ner_config.config)
 
     # train mtl
     # data_dir = os.path.join(ner_config.DATA_DIRECTORY, 'joint_data')
