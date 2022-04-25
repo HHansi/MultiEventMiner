@@ -35,7 +35,14 @@ def to_iob(sentences, predictions):
     return iob_outputs
 
 
-def to_binary(sentence, predictions):
+def to_binary(sentences, predictions):
+    """
+    Convert raw NER output to binary format
+    :param sentences: list of dict {'text': "sample text"}
+    :param predictions: list of dict {'start': i, 'end': j, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
+    :return: list
+        list of list which contains binary tags
+    """
     binary_outputs = []
     for idx, sample_labels in enumerate(predictions):
         binary_output = []

@@ -24,13 +24,6 @@ from farm.utils import initialize_device_settings
 logger = logging.getLogger(__name__)
 
 
-# def token_macro_f1(y_true, y_pred):
-#     f1_scores = []
-#     for t, p in zip(y_true, y_pred):
-#         f1_scores.append(f1_score(t, p, average="macro"))
-#     return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
-
-
 def loss_function(individual_losses: List[torch.Tensor], global_step=None, batch=None, alpha=1, beta=1):
     loss = (alpha * torch.sum(individual_losses[0]) + beta * torch.sum(individual_losses[1])) / (alpha + beta)
     return loss

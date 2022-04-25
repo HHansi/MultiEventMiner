@@ -46,7 +46,8 @@ class LanguageModellingModel:
             next_sent_pred=self.args.next_sent_pred
         )
 
-        # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a few descriptive statistics of our datasets
+        # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
+        # few descriptive statistics of our datasets
         data_silo = DataSilo(
             processor=processor,
             batch_size=self.args.train_batch_size,

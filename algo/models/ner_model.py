@@ -1,9 +1,6 @@
 # Created by Hansi at 10/4/2021
 import logging
-import re
 from pathlib import Path
-
-from sklearn.metrics import f1_score
 
 from algo.models.common.eval import token_macro_f1
 from algo.models.common.ner_util import to_iob, to_binary
@@ -21,13 +18,6 @@ from farm.train import EarlyStopping, Trainer
 from farm.utils import initialize_device_settings
 
 logger = logging.getLogger(__name__)
-
-
-# def token_macro_f1(y_true, y_pred):
-#     f1_scores = []
-#     for t, p in zip(y_true, y_pred):
-#         f1_scores.append(f1_score(t, p, average="macro"))
-#     return {"F1 macro score": sum(f1_scores) / len(f1_scores), "Total": len(f1_scores)}
 
 
 class NERModel:
@@ -48,10 +38,16 @@ class NERModel:
 
         if mode == 'inference':
             self.model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
-                                    max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
-                                    num_processes=self.args.num_processes)
+                                         max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                         num_processes=self.args.num_processes)
 
     def train_model(self, data_dir):
+        """
+        train sequence labelling model
+
+        :param data_dir: path to directory which holds training data
+        :return:
+        """
         # create tokenizer
         tokenizer = Tokenizer.load(pretrained_model_name_or_path=self.model_name,
                                    do_lower_case=self.args.do_lower_case)
@@ -70,7 +66,7 @@ class NERModel:
                                  dev_split=self.args.dev_split,
                                  delimiter=self.args.delimiter,
                                  # quote_char='"'  # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
-        )
+                                 )
 
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
         #    few descriptive statistics of our datasets
@@ -147,9 +143,6 @@ class NERModel:
             predictions- list of class labels
             raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
         """
-        # model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
-        #                         max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
-        #                         num_processes=self.args.num_processes)
         result = self.model.inference_from_dicts(dicts=texts)
         self.model.close_multiprocessing_pool()
 
@@ -169,51 +162,3 @@ class NERModel:
         args = NERModelArgs()
         args.load(input_dir)
         return args
-
-    # @staticmethod
-    # def to_iob(sentences, predictions):
-    #     """
-    #     Convert raw NER output to IOB2 format
-    #     :param sentences: list of dict {'text': "sample text"}
-    #     :param predictions: list of dict {'start': i, 'end': j, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
-    #     :return: list
-    #         list of list which contains IOB tags
-    #     """
-    #     iob_outputs = []
-    #     for idx, sample_labels in enumerate(predictions):
-    #         indices = [(ele.start(), ele.end()) for ele in re.finditer(r'\S+', sentences[idx]["text"])]
-    #         iob_output = ["O" for index in indices]
-    #         for label in sample_labels:
-    #             if label['label'] in ["[PAD]", "X"]:
-    #                 continue
-    #             for i, ind in enumerate(indices):
-    #                 if ind[0] == label['start']:
-    #                     iob_output[i] = f"B-{label['label']}"
-    #                     if ind[1] != label['end']:
-    #                         end_word_index = 0
-    #                         for j in range(i + 1, len(indices)):
-    #                             if indices[j][1] == label['end']:
-    #                                 end_word_index = j
-    #                                 break
-    #                         if end_word_index == 0:
-    #                             raise ValueError(f"Span index error found in output: {label}")
-    #                         for i_index in range(i + 1, end_word_index + 1):
-    #                             iob_output[i_index] = f"I-{label['label']}"
-    #                     break
-    #         iob_outputs.append(iob_output)
-    #     return iob_outputs
-    #
-    # @staticmethod
-    # def to_binary(sentence, predictions):
-    #     binary_outputs = []
-    #     for idx, sample_labels in enumerate(predictions):
-    #         binary_output = []
-    #         for label in sample_labels:
-    #             label_val = label['label']
-    #             binary_output.append(0 if label_val in ["[PAD]", "X"] else int(label_val))
-    #         binary_outputs.append(binary_output)
-    #     return binary_outputs
-
-
-
-

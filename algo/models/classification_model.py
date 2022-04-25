@@ -32,10 +32,16 @@ class ClassificationModel:
 
         if mode == 'inference':
             self.model = Inferencer.load(self.args.model_dir, batch_size=self.args.inference_batch_size,
-                                    max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
-                                    num_processes=self.args.num_processes)
+                                         max_seq_len=self.args.max_seq_len, gpu=self.args.gpu,
+                                         num_processes=self.args.num_processes)
 
     def train_model(self, data_dir):
+        """
+        train classification model
+
+        :param data_dir: path to directory which holds training data
+        :return:
+        """
         # create tokenizer
         tokenizer = Tokenizer.load(pretrained_model_name_or_path=self.model_name,
                                    do_lower_case=self.args.do_lower_case)
@@ -55,8 +61,7 @@ class ClassificationModel:
                                                 label_column_name=self.args.label_column_name,
                                                 text_column_name=self.args.text_column_name,
                                                 multilabel=self.args.multilabel,
-                                                quote_char='"'
-                                                # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
+                                                quote_char='"' # Quote chars are used so that text can include the tsv delimiter symbol (i.e. \t) without ruining the tsv format
                                                 )
         # create a DataSilo that loads several datasets (train/dev/test), provides DataLoaders for them and calculates a
         #    few descriptive statistics of our datasets
@@ -129,7 +134,6 @@ class ClassificationModel:
         predict labels for given samples
 
         :param texts: list of dict {'text': "sample text"}
-        :param inference_batch_size: int
         :return: list, list
             predictions- list of class labels
             raw predictions- list of dict {'start': None, 'end': None, 'context':"sample text", 'label': 'predicted label', 'probability': 0.9404173}
