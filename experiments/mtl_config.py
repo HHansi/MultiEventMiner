@@ -10,7 +10,6 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
-# TEMP_DIRECTORY = "temp"
 PREDICTION_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, 'predictions')
 SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.txt')
 
@@ -60,7 +59,7 @@ config = {
     'use_amp': None,
     'cude_device': "1",  # or None
 
-    'n_fold': 1,
+    'n_fold': 1,  # number of models to train for ensemble
     'fold_ids': [0],  # list of ids for folds
 
     # for inferencer

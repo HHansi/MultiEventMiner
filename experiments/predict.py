@@ -14,10 +14,9 @@ from experiments import classifier_config, mtl_config
 from experiments import ner_config
 from experiments.data_process.data_util import read_data_df, preprocess_data, read_tokens, get_token_test_instances, \
     save_tokens_farm_format
-from experiments.mtl_config import PREDICTION_DIRECTORY
-from experiments.ner_experiment import majority_class_for_ner
 from farm.data_handler.utils import read_ner_file
 from farm.utils import set_all_seeds
+
 # import warnings
 # warnings.filterwarnings("ignore")
 
@@ -92,7 +91,35 @@ def labels_to_iob(labels):
     return iob_labels
 
 
+def majority_class_for_ner(sentences, preds, n_folds):
+    """
+    Get majority class label for NER
+
+    :param sentences: list of dict {'text': "sample text"}
+    :param preds: list
+        predictions (IOB2 format) by all folds - [[fold_0 predictions], ... [fold_n predictions]]
+    :return: list
+        majority class IOB2 formatted predictions
+    """
+    preds = np.array(preds)
+    final_preds = []
+    for n in range(len(sentences)):  # iterate through each sentence
+        temp_preds = []
+        for i in range(len(preds[:, n][0])):  # iterate through each token
+            fold_preds = [preds[:, n][k][i] for k in range(n_folds)]  # get predictions by folds for token
+            temp_preds.append(
+                max(set(fold_preds), key=fold_preds.count))  # get majority class and add to temp_predictions
+        final_preds.append(temp_preds)
+    return final_preds
+
+
 def predict_classifier(config):
+    """
+    Make predictions on test data and save to a JSON file - sequence classification
+
+    :param config: JSON which holds configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -147,6 +174,12 @@ def predict_classifier(config):
 
 
 def predict_ner(config):
+    """
+    Make predictions on test data and save to a .txt file - sequence labelling
+
+    :param config: JSON which holds configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -183,7 +216,8 @@ def predict_ner(config):
     for lang in test_instances.keys():
         # select majority class for each token in each sentence
         logger.info(f"Calculating majority class for {lang}...")
-        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
+        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds,
+                                             config["n_fold"])
         final_preds = labels_to_iob(final_preds)
 
         # merge split sentences
@@ -210,6 +244,12 @@ def predict_ner(config):
 
 
 def predict_ner_binary(config):
+    """
+    Make predictions on test data and save to a .txt file - sequence labelling (binary)
+
+    :param config: JSON which holds configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -218,7 +258,8 @@ def predict_ner_binary(config):
     test_instances = dict()
     for lang in ner_config.LANGUAGES:
         # read dev data
-        dev_data_path = os.path.join(ner_config.DATA_DIRECTORY, "subtask4-token/filtered/farm_format/split_binary", f"{lang}-dev.txt")
+        dev_data_path = os.path.join(ner_config.DATA_DIRECTORY, "subtask4-token/filtered/farm_format/split_binary",
+                                     f"{lang}-dev.txt")
         data = read_ner_file(dev_data_path)
         tokens = [x['text'].split() for x in data]
         labels = [list(map(int, x['ner_label'])) for x in data]
@@ -250,7 +291,8 @@ def predict_ner_binary(config):
     for lang in test_instances.keys():
         # select majority class for each token in each sentence
         logger.info(f"Calculating majority class for {lang}...")
-        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
+        final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds,
+                                             config["n_fold"])
 
         logger.info(f"Saving test predictions for {lang}...")
         submission_file_name = os.path.basename(ner_config.SUBMISSION_FILE)
@@ -263,6 +305,12 @@ def predict_ner_binary(config):
 
 
 def predict_mtl(config, test_folder_path, type='sentence'):
+    """
+    Make predictions on test data using mtl model
+
+    :param config: JSON which holds configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -334,7 +382,8 @@ def predict_mtl(config, test_folder_path, type='sentence'):
             elif type == 'token-binary':
                 for idx, p in enumerate(token_predictions):
                     if len(test_instances[lang].test_tokens[idx]) > len(p):
-                        token_predictions[idx] = p + [0 for i in range(len(test_instances[lang].test_tokens[idx]) - len(p))]
+                        token_predictions[idx] = p + [0 for i in
+                                                      range(len(test_instances[lang].test_tokens[idx]) - len(p))]
                 test_instances[lang].preds.append(token_predictions)
             else:
                 test_instances[lang].preds.append(remove_ib(token_predictions))
@@ -363,12 +412,13 @@ def predict_mtl(config, test_folder_path, type='sentence'):
                     f.write("%s\n" % item)
 
         else:
-            final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds, config["n_fold"])
+            final_preds = majority_class_for_ner(test_instances[lang].sentences, test_instances[lang].preds,
+                                                 config["n_fold"])
 
             submission_file_name = os.path.basename(ner_config.SUBMISSION_FILE)
             submission_file_name_splits = os.path.splitext(submission_file_name)
             submission_file = os.path.join(os.path.dirname(ner_config.SUBMISSION_FILE),
-                                       f"{submission_file_name_splits[0]}_{lang}{submission_file_name_splits[1]}")
+                                           f"{submission_file_name_splits[0]}_{lang}{submission_file_name_splits[1]}")
 
             logger.info(f"Saving test predictions for {lang}...")
             if type == 'token-binary':
@@ -419,7 +469,3 @@ if __name__ == '__main__':
     # test_folder_path = os.path.join(ner_config.DATA_DIRECTORY, "subtask4-token")
     # mtl_config.SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.txt')
     # predict_mtl(mtl_config.config, test_folder_path, type='token-binary')
-
-
-
-

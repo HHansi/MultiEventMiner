@@ -9,14 +9,13 @@ DATA_DIRECTORY = os.path.join(BASE_PATH, 'data')
 
 OUTPUT_DIRECTORY = os.path.join(BASE_PATH, 'output')
 
-# TEMP_DIRECTORY = "temp"
 PREDICTION_DIRECTORY = os.path.join(OUTPUT_DIRECTORY, 'predictions')
 SUBMISSION_FILE = os.path.join(PREDICTION_DIRECTORY, 'submission.json')
 
 # Either one (model name or directory) should be provided. Other should be set to None.
 # If both provided, only the model name will be considered.
-MODEL_NAME = None  # "dccuchile/bert-base-spanish-wwm-cased"  # "xlm-roberta-large"
-MODEL_DIRECTORY = "/experiments/tranasinghe/MultiEventMiner/trained_models2/token/bert-large-cased-en"  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
+MODEL_NAME = "xlm-roberta-large"  # "dccuchile/bert-base-spanish-wwm-cased"
+MODEL_DIRECTORY = ""  # Use if multiple models need to be referred during training (model name = model_<fold_id>).
 LANGUAGES = ["en"]
 
 config = {
@@ -49,7 +48,7 @@ config = {
     'use_amp': None,
     'cude_device': "2",  # "1",  # or None
 
-    'n_fold': 5,
+    'n_fold': 5,  # number of models to train for ensemble
     'fold_ids': [0, 1, 2, 3, 4],  # list of ids for folds
 
     # for inferencer

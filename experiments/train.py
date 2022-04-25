@@ -19,10 +19,16 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
-
-
 def train_classifier(data_dir, config):
+    """
+    Train sequence classification model
+
+    :param data_dir: path to directory which holds training data
+        file name format: <language>-train.tsv
+        compulsory columns: label, text (named can be set via config)
+    :param config: JSON which holds model configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -75,6 +81,15 @@ def train_classifier(data_dir, config):
 
 
 def train_ner(data_dir, config):
+    """
+    Train sequence labelling model
+
+    :param data_dir: path to directory which holds training data
+        file name format: <language>-train.txt
+        file format: FARM token data format with BIO tags
+    :param config: JSON which holds model configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -126,6 +141,15 @@ def train_ner(data_dir, config):
 
 
 def train_mtl_model(data_dir, config):
+    """
+    Train model for sequence classification and labelling
+
+    :param data_dir: path to directory which holds training data
+        file name format: <language>-train.txt
+        compulsory columns: token_label (BIO), text_label, text (named can be set via config)
+    :param config: JSON which holds model configurations
+    :return:
+    """
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -153,28 +177,6 @@ def train_mtl_model(data_dir, config):
                 model = MTLModel(os.path.join(mtl_config.MODEL_DIRECTORY, f"model_{i}"), args=config)
         logger.info(f"Training model for fold {i}...")
         model.train_model(data_dir)
-
-
-# def convert():
-#     path = os.path.join(classifier_config.MODEL_DIRECTORY, f"model_0")
-#     model = Converter.convert_from_transformers(path, device="cpu")
-#     # model.save(os.path.join(classifier_config.MODEL_DIRECTORY, f"model_1"))
-#
-#     tokenizer = Tokenizer.load(pretrained_model_name_or_path=path, do_lower_case=True)
-#     processor = TextClassificationProcessor(tokenizer=tokenizer,
-#                                             max_seq_len=128,
-#                                             data_dir="data",
-#                                             label_list=[],
-#                                             label_column_name="label",
-#                                             metric="acc",
-#                                             quote_char='"',
-#                                             )
-#
-#     model.connect_heads_with_processor(processor.tasks, require_labels=True)
-#
-#     save_dir = os.path.join(classifier_config.MODEL_DIRECTORY, f"model_2")
-#     model.save(save_dir)
-#     processor.save(save_dir)
 
 
 if __name__ == '__main__':
