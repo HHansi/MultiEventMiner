@@ -2,8 +2,7 @@
 import unittest
 
 from algo.models.ner_model import NERModel
-from experiments.ner_experiment import majority_class_for_ner
-from experiments.predict import remove_ib, labels_to_iob
+from experiments.predict import remove_ib, labels_to_iob, majority_class_for_ner
 
 
 class TestNERFormatting(unittest.TestCase):
@@ -93,3 +92,38 @@ class TestNERPredictions(unittest.TestCase):
         print(output)
         self.assertEqual(output, expected_output)
 
+    def test_majority_class_for_ner_binary(self):
+        test_sentences = [
+            {"text": "Paris is a town in France"},
+            {"text": "Only France and Britain backed proposal ."},
+            {"text": "Peter Blackburn"},
+        ]
+
+        n_folds = 3
+        # fold 0 predictions
+        fold_0_1 = [0, 0, 0, 0, 0, 0]
+        fold_0_2 = [0, 1, 0, 1, 0, 0, 0]
+        fold_0_3 = [1, 1]
+        fold_0_output = [fold_0_1, fold_0_2, fold_0_3]
+
+        # fold 1 predictions
+        fold_1_1 = [1, 0, 0, 0, 0, 0]
+        fold_1_2 = [0, 1, 0, 1, 0, 0, 0]
+        fold_1_3 = [1, 1]
+        fold_1_output = [fold_1_1, fold_1_2, fold_1_3]
+
+        # fold 2 predictions
+        fold_2_1 = [1, 0, 0, 0, 0, 0]
+        fold_2_2 = [0, 0, 0, 0, 0, 0, 0]
+        fold_2_3 = [1, 1]
+        fold_2_output = [fold_2_1, fold_2_2, fold_2_3]
+
+        preds = [fold_0_output, fold_1_output, fold_2_output]  # [[fold_0 predictions], ... [fold_n predictions]]
+
+        expected_output = [[1, 0, 0, 0, 0, 0],
+                           [0, 1, 0, 1, 0, 0, 0],
+                           [1, 1]]
+
+        output = majority_class_for_ner(test_sentences, preds, n_folds=n_folds)
+        print(output)
+        self.assertEqual(output, expected_output)
