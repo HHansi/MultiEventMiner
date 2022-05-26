@@ -1,4 +1,4 @@
-#MultiEventMiner
+# MultiEventMiner
 
 MultiEventMiner supports transformer-based cross-lingual news event detection at different levels of data granularity 
 (i.e. sentence level and token level), involving different language-based learning strategies and a novel two-phase transfer 
