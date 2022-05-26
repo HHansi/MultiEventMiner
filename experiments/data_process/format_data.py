@@ -40,12 +40,6 @@ def token_to_ner(input_path, output_path, train=True):
     token_data, sentence_tokens, sentence_labels, token_sentence_count, sentence_without_trigger_count = \
         get_token_sentences(tokens, labels)
     save_tokens_farm_format(sentence_tokens, sentence_labels, output_path)
-    # with open(output_path, "w", encoding="utf-8") as f:
-    #     f.write("-DOCSTART-\tO\n\n")
-    #     for temp_tokens, temp_labels in zip(sentence_tokens, sentence_labels):
-    #         for token, label in zip(temp_tokens, temp_labels):
-    #             f.write("{}\t{}\n".format(token, label))
-    #         f.write("\n")
 
 
 def doc_to_lm_data(doc_train_path, doc_test_path, output_path, plot_path=None):
@@ -112,7 +106,6 @@ def split_tokens(input_path, output_folder, test_size=0.2, binary_labels=False, 
     data = read_ner_file(input_path)
     # train, dev = train_test_split(data, shuffle=True, test_size=test_size, random_state=157)
 
-    #
     if sentence_data_path:
         targeted_dev_size = int(round(len(data)*0.2))
         print(f"Targeted dev size = {targeted_dev_size}")
@@ -137,40 +130,11 @@ def split_tokens(input_path, output_folder, test_size=0.2, binary_labels=False, 
         train, dev = train_test_split(non_duplicates, shuffle=True, test_size=targeted_dev_size, random_state=SEED)
         train = train + duplicates
 
-    #     train_temp, dev = train_test_split(data, shuffle=True, test_size=test_size, random_state=SEED)
-    #     targeted_dev_size = len(dev)
-    #     sent_df = read_data_df(sentence_data_path)
-    #     print(f"Loaded {len(sent_df)} sentences.")
-    #     tokens = [x['text'].split() for x in dev]
-    #     duplicate_ids = get_token_level_duplicates(tokens, sent_df)
-    #     # remove duplicates from dev set and add them to train samples
-    #     train_samples = []
-    #     for id in duplicate_ids:
-    #         train_samples.append(dev[id])
-    #         del dev[id]
-    #
-    #     while len(dev) < targeted_dev_size:  # if length of dev is smaller after removing duplicates
-    #         train_temp, dev_temp = train_test_split(train_temp, shuffle=True, test_size=test_size, random_state=SEED)
-    #         tokens_temp = [x['text'].split() for x in dev_temp]
-    #         duplicate_ids = get_token_level_duplicates(tokens_temp, sent_df)
-    #         for id in duplicate_ids:
-    #             train_samples.append(dev_temp[id])
-    #             del dev_temp[id]
-    #         diff = targeted_dev_size - len(dev)
-    #         if len(dev_temp) >= diff:
-    #             dev = dev + dev_temp[:diff]
-    #             train_samples = train_samples + dev_temp[diff:]
-    #             break
-    #         else:
-    #             dev = dev + dev_temp
-    #
-    #     train = train_temp + train_samples
     else:
         train, dev = train_test_split(data, shuffle=True, test_size=test_size, random_state=SEED)
 
     print(f"Train size: {len(train)}")
     print(f"Dev size: {len(dev)}")
-    #
 
     train_sentences = [x['text'].split() for x in train]
     train_labels = [x['ner_label'] for x in train]
@@ -245,7 +209,7 @@ def split_sentence_data(data_file_path, seed, args, output_folder=None):
         train = data.iloc[train_index]
         dev = data.iloc[test_index]
     else:
-        train, dev = train_test_split(data, test_size=dev_split, random_state=seed)
+        train, dev = train_test_split(data, test_size=args['dev_split'], random_state=seed)
 
     logger.info(f"Train instances: {train.shape[0]}")
     logger.info(f"Dev instances: {dev.shape[0]}")
@@ -341,97 +305,10 @@ def prepare_multilingual_token_data(languages, input_folder, seed, args, output_
     return train, dev
 
 
-
-# def prepare_multilingual_sentence_data(languages, input_folder, output_folder, dev_split, seed):
-#     data_dict = dict()  # {lang:data frame}
-#     data_sizes_dict = dict()  # {lang:size}
-#     logger.info(f"Preparing multilingual sentence data..")
-#     for lang in languages:
-#         file_path = os.path.join(input_folder, f"{lang}-train.tsv")
-#         df = pd.read_csv(file_path, sep='\t')
-#         data_dict[lang] = df
-#         data_sizes_dict[lang] = df.shape[0]
-#         logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
-#
-#     total_instances = sum(data_sizes_dict.values())
-#     logger.info(f"Total instances: {total_instances}")
-#     dev_instances = round(total_instances * dev_split)
-#     logger.info(f"Targeted dev instance: {dev_instances}")
-#
-#     train = pd.DataFrame(columns=['id', 'label', 'text'])
-#     dev = pd.DataFrame(columns=['id', 'label', 'text'])
-#     for lang in languages:
-#         logger.info(f"Splitting {lang}..")
-#         temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
-#         logger.info(f"Dev count: {temp_dev_count}")
-#         temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
-#         train = train.append(temp_train)
-#         dev = dev.append(temp_dev)
-#
-#     # shuffle train and dev sets
-#     # train = train.sample(frac=1).reset_index(drop=True)
-#     # dev = dev.sample(frac=1).reset_index(drop=True)
-#     train = shuffle(train, random_state=seed)
-#     dev = shuffle(dev, random_state=seed)
-#
-#     train.to_csv(os.path.join(output_folder, SENTENCE_TRAIN_DATA_FILE), sep='\t', index=False)
-#     logger.info(f"Saved {train.shape[0]} train instances.")
-#     dev.to_csv(os.path.join(output_folder, SENTENCE_DEV_DATA_FILE), sep='\t', index=False)
-#     logger.info(f"Saved {dev.shape[0]} dev instances.")
-
-
-# def prepare_multilingual_token_data(languages, input_folder, output_folder, dev_split, seed):
-#     data_dict = dict()  # {lang:data frame}
-#     data_sizes_dict = dict()  # {lang:size}
-#     logger.info(f"Preparing multilingual token data..")
-#     for lang in languages:
-#         file_path = os.path.join(input_folder, f"{lang}-train.txt")
-#         data = read_ner_file(file_path)
-#         data_dict[lang] = data
-#         data_sizes_dict[lang] = len(data)
-#         logger.info(f"Instances loaded for {lang}: {data_sizes_dict[lang]}")
-#
-#     total_instances = sum(data_sizes_dict.values())
-#     logger.info(f"Total instances: {total_instances}")
-#     dev_instances = round(total_instances * dev_split)
-#     logger.info(f"Targeted dev instance: {dev_instances}")
-#
-#     train = []
-#     dev = []
-#     for lang in languages:
-#         logger.info(f"Splitting {lang}..")
-#         temp_dev_count = round((data_sizes_dict[lang]/total_instances) * dev_instances)
-#         logger.info(f"Dev count: {temp_dev_count}")
-#         temp_train, temp_dev = train_test_split(data_dict[lang], test_size=temp_dev_count, random_state=seed)
-#         train.extend(temp_train)
-#         dev.extend(temp_dev)
-#
-#     # shuffle train and dev sets
-#     train = shuffle(train, random_state=seed)
-#     dev = shuffle(dev, random_state=seed)
-#
-#     train_sentences = [x['text'].split() for x in train]
-#     train_labels = [x['ner_label'] for x in train]
-#     dev_sentences = [x['text'].split() for x in dev]
-#     dev_labels = [x['ner_label'] for x in dev]
-#
-#     for idx, sent in enumerate(train_sentences):
-#         if len(sent) != len(train_labels[idx]):
-#             raise IndexError(f"Train sentence and label mismatch!")
-#     for idx, sent in enumerate(dev_sentences):
-#         if len(sent) != len(dev_labels[idx]):
-#             raise IndexError(f"Dev sentence and label mismatch!")
-#
-#     save_tokens_farm_format(train_sentences, train_labels, os.path.join(output_folder, TOKEN_TRAIN_DATA_FILE))
-#     logger.info(f"Saved {len(train_sentences)} train instances.")
-#     save_tokens_farm_format(dev_sentences, dev_labels, os.path.join(output_folder, TOKEN_DEV_DATA_FILE))
-#     logger.info(f"Saved {len(dev_sentences)} dev instances.")
-
-
 if __name__ == '__main__':
-    # input_path = os.path.join(DATA_DIRECTORY, '../data/subtask2-sentence/filtered/en-train.json')
-    # output_path = os.path.join(DATA_DIRECTORY, '../data/subtask2-sentence/filtered/farm_format/en-train2.tsv')
-    # sentence_to_tsv(input_path, output_path)
+    input_path = os.path.join(DATA_DIRECTORY, '../data/subtask2-sentence/filtered/en-train.json')
+    output_path = os.path.join(DATA_DIRECTORY, '../data/subtask2-sentence/filtered/farm_format/en-train2.tsv')
+    sentence_to_tsv(input_path, output_path)
 
     # input_path = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/es-train.txt')
     # output_path = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format/es-train.txt')
@@ -453,40 +330,10 @@ if __name__ == '__main__':
     # split_tokens(input_path, output_folder, test_size=0.2, binary_labels=False, sentence_data_path=sentence_data_path)
 
     # sentence_data_path = os.path.join(DATA_DIRECTORY, "subtask2-sentence", "filtered/en-train.json")
-    # # token_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "filtered/farm_format/en-train.txt")
     # token_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "filtered/farm_format/split_binary/en-train.txt")
     # output_path = os.path.join(DATA_DIRECTORY, "joint_data", "en-train-binary.csv")
     # format_multi_task_data(sentence_data_path, token_data_path, output_path)
 
-
-    # input_path = os.path.join(DATA_DIRECTORY, "joint_data", "en-train.csv")
-    # output_path = os.path.join(DATA_DIRECTORY, "joint_data", "en-train2.csv")
-    # df = pd.read_csv(input_path)
-    # texts = []
-    # for tokens in df['text_tokens'].values.tolist():
-    #     tokens = ast.literal_eval(tokens)
-    #     text = ' '.join(tokens)
-    #     texts.append(text)
-    # df['text'] = texts
-    #
-    # # tokens = df['text_tokens'].values.tolist()
-    # # tokens = ast.literal_eval(tokens)
-    # # df['text'] = [' '.join(x) for x in tokens]
-    # df.to_csv(output_path, index=False, encoding="utf-8")
-
-    # languages = ["en", "pr"]
-    # input_folder = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/filtered/farm_format')
-    # output_file_path = ""
-    # dev_split = 0.1
-    # seed = 157
-    # prepare_multilingual_sentence_data(languages, input_folder, output_file_path, dev_split, seed)
-
-    languages = ["en", "pr"]
-    input_folder = os.path.join(DATA_DIRECTORY, 'subtask4-token/filtered/farm_format')
-    output_folder = ""
-    dev_split = 0.1
-    seed = 157
-    prepare_multilingual_token_data(languages, input_folder, output_folder, dev_split, seed)
 
 
 

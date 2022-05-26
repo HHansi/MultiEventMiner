@@ -129,26 +129,3 @@ def get_token_test_instances(tokens):
 
     return sentence_tokens, dict_instance_sentence
 
-
-if __name__ == '__main__':
-    # test_data_path = os.path.join(DATA_DIRECTORY, "subtask4-token", "en-test.txt")
-    # tokens, _ = read_tokens(test_data_path, train=False)
-    # sentence_tokens, dict_instance_sentence= get_token_test_instances(tokens)
-    # print(len(sentence_tokens))
-    #
-    # merged = []
-    # for k, v in dict_instance_sentence.items():
-    #     merged_pred = sentence_tokens[v[0]]
-    #     if len(v) > 1:
-    #         for i in v[1:len(v)]:
-    #             merged_pred.extend(["O"])
-    #             merged_pred.extend(sentence_tokens[i])
-    #     merged.append(merged_pred)
-    # print(merged)
-
-    path = os.path.join(DATA_DIRECTORY, "subtask4-token", "filtered/farm_format/en-en-en-train.txt")
-    data = read_ner_file(path)
-    print()
-
-
-

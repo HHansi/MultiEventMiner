@@ -4,9 +4,9 @@ import os
 from nltk import word_tokenize
 from tqdm import tqdm
 
+from experiments.data_config import DATA_DIRECTORY
 from experiments.data_process.data_util import read_data_df, save_data, read_tokens, save_tokens, \
     read_tokens_farm_format
-from experiments.data_config import DATA_DIRECTORY
 
 
 # detokenizer = TreebankWordDetokenizer()
@@ -287,13 +287,3 @@ if __name__ == '__main__':
     # doc_file_path = os.path.join(DATA_DIRECTORY, 'subtask1-doc/en-test.json')
     # sentence_file_path = os.path.join(DATA_DIRECTORY, 'subtask2-sentence/en-test.json')
     # count_common_docs_to_sentence_level(doc_file_path, sentence_file_path)
-
-
-    lst1 = [['a', 'b', 'c'], ['d', 'e', 'f']]
-    lst2 = ['d', 'e', 'g']
-    if lst2 in lst1:
-        print('yes')
-    print(lst1 - lst2)
-
-
-
