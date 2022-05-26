@@ -145,7 +145,7 @@ def train_mtl_model(data_dir, config):
     Train model for sequence classification and labelling
 
     :param data_dir: path to directory which holds training data
-        file name format: <language>-train.txt
+        file name format: <language>-train.csv
         compulsory columns: token_label (BIO), text_label, text (named can be set via config)
     :param config: JSON which holds model configurations
     :return:
