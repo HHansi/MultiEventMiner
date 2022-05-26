@@ -309,14 +309,6 @@ def predict_mtl(config, test_folder_path, type='sentence'):
     Make predictions on test data using mtl model
 
     :param config: JSON which holds configurations
-    :return:
-    """
-    # set cuda device
-    if config["cude_device"] is not None:
-        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
-
-    """
-    :param config:
     :param test_folder_path:
     :param type: str, optional
         defines the type of the data in the test data file
@@ -325,6 +317,10 @@ def predict_mtl(config, test_folder_path, type='sentence'):
         'token-iob' - tokens (targeted iob labels) in case format .txt
     :return:
     """
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
     create_folder_if_not_exist(ner_config.PREDICTION_DIRECTORY)
     test_instances = dict()
     for lang in mtl_config.LANGUAGES:
