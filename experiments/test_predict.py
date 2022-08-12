@@ -10,6 +10,8 @@ import os, psutil
 def sentence_predict():
     text_en = "A child ran around in a T-shirt that read: New Great Country Wonderful Country China."
 
+    texts = [{'text': text_en}]
+
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
@@ -32,7 +34,7 @@ def sentence_predict():
 
     print(f'predicting')
     start_time = time.time()
-    predictions, raw_predictions = model.predict([text_en])
+    predictions, raw_predictions = model.predict(texts)
     end_time = time.time()
     print(f'Predicted in {(end_time - start_time)} seconds \n')
 
