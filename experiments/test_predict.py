@@ -10,6 +10,12 @@ import os, psutil
 def sentence_predict():
     text_en = "A child ran around in a T-shirt that read: New Great Country Wonderful Country China."
 
+    # set cuda device
+    if config["cude_device"] is not None:
+        os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
+
+    config['model_dir'] = "/experiments/tranasinghe/MultiEventMiner/trained_models2/sentence/bert-large-cased-en/model_0"
+
     print(f'loading model')
     start_time = time.time()
     model = ClassificationModel(classifier_config.MODEL_NAME, args=config, mode='inference')
