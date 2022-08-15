@@ -1,7 +1,9 @@
 # Created by Hansi at 8/12/2022
 from algo.models.classification_model import ClassificationModel
-from experiments import classifier_config
-from experiments.classifier_config import config
+from algo.models.ner_model import NERModel
+from experiments import classifier_config, ner_config
+# from experiments.classifier_config import config
+from experiments.ner_config import config
 
 import time
 import os, psutil
@@ -22,7 +24,9 @@ def sentence_predict():
 
     print(f'loading model')
     start_time = time.time()
-    model = ClassificationModel(classifier_config.MODEL_NAME, args=config, mode='inference')
+    # model = ClassificationModel(classifier_config.MODEL_NAME, args=config, mode='inference')
+    model = NERModel(ner_config.MODEL_NAME, args=config, mode='inference')
+
     end_time = time.time()
     print(f'Model loaded in {(end_time - start_time)} seconds \n')
     print(f'loaded: {classifier_config.MODEL_NAME}')
