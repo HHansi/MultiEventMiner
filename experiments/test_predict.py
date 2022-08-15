@@ -12,13 +12,13 @@ def sentence_predict():
     text_es = "Por eso aquel artículo de Bayer me pareció por lo menos temerario."
     text_pr = "Investigadores das duas unidades devem viajar em breve ao Paquistão, afirmou a fonte."
 
-    texts = [{'text': text_es}]
+    texts = [{'text': text_en}]
 
     # set cuda device
     if config["cude_device"] is not None:
         os.environ["CUDA_VISIBLE_DEVICES"] = config["cude_device"]
 
-    config['model_dir'] = "/experiments/tranasinghe/MultiEventMiner/trained_models2/sentence/beto-cased-es/model_0"
+    config['model_dir'] = "/experiments/tranasinghe/MultiEventMiner/trained_models2/token/bert-large-cased-en/model_0"
 
     print(f'loading model')
     start_time = time.time()
