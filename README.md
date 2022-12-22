@@ -16,9 +16,9 @@ Then, the remaining libraries listed in [requirements.txt](https://github.com/HH
 
 ## Experiments
 ### Train models
-[train.py](https://github.com/HHansi/MultiEventMiner/blob/master/experiments/train.py) contains all the functions developed to train sentence and token level models.
+Refer to [train.py](https://github.com/HHansi/MultiEventMiner/blob/master/experiments/train.py) to get access to all the functions developed to train sentence and token level models.
 
 ### Predict
-[predict.py](https://github.com/HHansi/MultiEventMiner/blob/master/experiments/predict.py) contains all the functions developed to make predictions at sentence and token levels using trained models. 
+Refer to [predict.py](https://github.com/HHansi/MultiEventMiner/blob/master/experiments/predict.py) to get access to all the functions developed to make predictions at sentence and token levels using trained models. 
 
 
